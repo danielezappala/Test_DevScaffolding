@@ -1,0 +1,175 @@
+services:
+  traefik:
+    image: traefik:v3
+    container_name: test-devscaffolding-traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic:/etc/traefik/dynamic:ro
+      - ./traefik/acme:/acme
+    networks:
+      - test-devscaffolding-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.test.example.com`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: test-devscaffolding-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=SL3jL_5pf7HDpIBIWy1MCLhIVobI-_WuxtR71_NLN2Y
+      - APP_VERSION=0.1.0
+      - GIT_COMMIT=dev
+      - BUILD_DATE=2025-11-19T21:50:07.698425
+      - CORS_ORIGINS=https://test.example.com/test-devscaffolding,http://localhost:3000/test-devscaffolding
+      - ROOT_PATH=/test-devscaffolding
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      pgbouncer:
+        condition: service_started
+    networks:
+      - test-devscaffolding-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`test.example.com`) && PathPrefix(`/test-devscaffolding/api`)"
+      - "traefik.http.middlewares.strip-base-path.stripprefix.prefixes=/test-devscaffolding"
+      - "traefik.http.routers.backend.middlewares=strip-base-path"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+      - "traefik.http.routers.backend-metrics.rule=Host(`test.example.com`) && Path(`/test-devscaffolding/metrics`)"
+      - "traefik.http.routers.backend-metrics.middlewares=strip-base-path"
+      - "traefik.http.routers.backend-metrics.entrypoints=websecure"
+      - "traefik.http.routers.backend-metrics.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.backend-local.rule=Host(`localhost`) && PathPrefix(`/test-devscaffolding/api`)"
+      - "traefik.http.routers.backend-local.entrypoints=web"
+      - "traefik.http.routers.backend-local.middlewares=strip-base-path"
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_BASE_PATH=/test-devscaffolding
+    container_name: test-devscaffolding-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=https://test.example.com/test-devscaffolding/api
+      - NEXT_PUBLIC_BASE_PATH=/test-devscaffolding
+    depends_on:
+      - backend
+    networks:
+      - test-devscaffolding-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`test.example.com`) && PathPrefix(`/test-devscaffolding`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.frontend-local.rule=Host(`localhost`) && PathPrefix(`/test-devscaffolding`)"
+      - "traefik.http.routers.frontend-local.entrypoints=web"
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: test-devscaffolding-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - test-devscaffolding-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: test-devscaffolding-pgbouncer
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=${POSTGRES_URL}
+      - POOL_MODE=transaction
+      - MAX_CLIENT_CONN=100
+      - DEFAULT_POOL_SIZE=20
+    volumes:
+      - ./postgres/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - test-devscaffolding-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: test-devscaffolding-redis
+    restart: unless-stopped
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - redis_data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - test-devscaffolding-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: test-devscaffolding-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - test-devscaffolding-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.test.example.com`)"
+      - "traefik.http.routers.prometheus.entrypoints=websecure"
+      - "traefik.http.routers.prometheus.tls.certresolver=letsencrypt"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+    profiles:
+      - monitoring
+
+networks:
+  test-devscaffolding-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:

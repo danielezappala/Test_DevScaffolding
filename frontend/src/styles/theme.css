@@ -1,0 +1,48 @@
+/* src/styles/theme.css */
+/* Minimal black & white theme - aligned with globals.css */
+:root {
+  /* Default light theme colors - minimal b&w */
+  --color-bg: #ffffff;
+  --color-surface: #fafafa;
+  --color-primary: #0a0a0a;
+  /* black */
+  --color-accent: #737373;
+  /* gray */
+  --color-text: #171717;
+}
+
+.dark {
+  --color-bg: #0a0a0a;
+  --color-surface: #171717;
+  --color-primary: #fafafa;
+  /* white */
+  --color-accent: #a3a3a3;
+  /* light gray */
+  --color-text: #fafafa;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', 'Outfit', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  opacity: 0.7;
+}
+
+/* Simple minimal card */
+.card {
+  background: var(--color-surface);
+  border: 1px solid #e5e5e5;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 1rem;
+}

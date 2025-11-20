@@ -1,0 +1,463 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+# Ensure only one workflow runs per PR/branch to avoid confusion in status checks
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "20"
+  COVERAGE_THRESHOLD: "80"
+
+jobs:
+  # Backend linting job - runs in parallel with other lint jobs
+  lint-backend:
+    name: Lint Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt', 'backend/requirements-dev.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff mypy
+          pip install -r requirements-dev.txt
+
+      - name: Run ruff linting
+        id: ruff
+        working-directory: backend
+        run: |
+          echo "Running ruff linting on backend..."
+          if ! ruff check app/ tests/; then
+            echo "❌ Backend linting failed"
+            echo "::error::Backend linting errors found. Run 'cd backend && ruff check app/ tests/' locally."
+            echo "::error::To auto-fix issues, run: cd backend && ruff check --fix app/ tests/"
+            echo "::error::Documentation: https://docs.astral.sh/ruff/"
+            echo "::error::Common fixes: Remove unused imports, fix line length, add missing docstrings"
+            exit 1
+          fi
+          echo "✅ Backend linting passed"
+
+      - name: Run mypy type checking
+        id: mypy
+        working-directory: backend
+        run: |
+          echo "Running mypy type checking on backend..."
+          if ! mypy app/ --ignore-missing-imports; then
+            echo "❌ Backend type checking failed"
+            echo "::error::Backend type checking errors found. Run 'cd backend && mypy app/' locally."
+            echo "::error::For detailed errors, run: cd backend && mypy app/ --show-error-codes"
+            echo "::error::Documentation: https://mypy.readthedocs.io/"
+            exit 1
+          fi
+          echo "✅ Backend type checking passed"
+
+  # Backend testing job - runs in parallel with other test jobs
+  test-backend:
+    name: Test Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt', 'backend/requirements-dev.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Run tests with coverage
+        id: pytest
+        working-directory: backend
+        run: |
+          echo "Running backend tests with coverage..."
+          if ! pytest --cov=app --cov-report=term --cov-report=xml --cov-report=html --cov-fail-under=${{ env.COVERAGE_THRESHOLD }}; then
+            echo "❌ Backend tests failed or coverage below ${{ env.COVERAGE_THRESHOLD }}%"
+            echo "::error::Backend test failures detected. Run 'cd backend && pytest -v' locally to see details."
+            echo "::error::For verbose output with full diff, run: cd backend && pytest -vv"
+            echo "::error::To run a specific test: cd backend && pytest tests/test_file.py::test_name -v"
+            echo "::error::Coverage reports are available in the artifacts section."
+            echo "::error::Documentation: https://docs.pytest.org/"
+            exit 1
+          fi
+          echo "✅ Backend tests passed with sufficient coverage"
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage-reports
+          path: |
+            backend/coverage.xml
+            backend/htmlcov/
+
+  # Frontend linting job - runs in parallel with other lint jobs
+  lint-frontend:
+    name: Lint Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run ESLint
+        id: eslint
+        working-directory: frontend
+        run: |
+          echo "Running ESLint on frontend..."
+          if ! npm run lint; then
+            echo "❌ Frontend linting failed"
+            echo "::error::Frontend linting errors found. Run 'cd frontend && npm run lint' locally."
+            echo "::error::To auto-fix issues, run: cd frontend && npm run lint -- --fix"
+            echo "::error::Documentation: https://eslint.org/docs/latest/"
+            echo "::error::Common fixes: Remove unused variables, fix formatting, add missing dependencies"
+            exit 1
+          fi
+          echo "✅ Frontend linting passed"
+
+      - name: Run TypeScript type checking
+        id: tsc
+        working-directory: frontend
+        run: |
+          echo "Running TypeScript type checking on frontend..."
+          if ! npm run type-check; then
+            echo "❌ Frontend type checking failed"
+            echo "::error::Frontend type checking errors found. Run 'cd frontend && npm run type-check' locally."
+            echo "::error::Documentation: https://www.typescriptlang.org/docs/"
+            echo "::error::Common fixes: Add type annotations, fix incompatible types, update tsconfig.json"
+            exit 1
+          fi
+          echo "✅ Frontend type checking passed"
+
+  # Frontend testing job - runs in parallel with other test jobs
+  test-frontend:
+    name: Test Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run tests with coverage
+        id: vitest
+        working-directory: frontend
+        run: |
+          echo "Running frontend tests with coverage..."
+          if ! npm run test -- --coverage --coverage.reporter=text --coverage.reporter=json --coverage.reporter=html; then
+            echo "❌ Frontend tests failed"
+            echo "::error::Frontend test failures detected. Run 'cd frontend && npm test' locally to see details."
+            echo "::error::For UI mode, run: cd frontend && npm test -- --ui"
+            echo "::error::Documentation: https://vitest.dev/"
+            exit 1
+          fi
+          echo "✅ Frontend tests passed"
+
+      - name: Check coverage threshold
+        id: coverage
+        working-directory: frontend
+        run: |
+          echo "Checking coverage threshold..."
+          # Extract coverage percentage from coverage summary
+          COVERAGE=$(node -e "const coverage = require('./coverage/coverage-summary.json'); const total = coverage.total; const pct = total.lines.pct; console.log(pct);")
+          echo "Coverage: $COVERAGE%"
+          if (( $(echo "$COVERAGE < ${{ env.COVERAGE_THRESHOLD }}" | bc -l) )); then
+            echo "❌ Coverage $COVERAGE% is below threshold ${{ env.COVERAGE_THRESHOLD }}%"
+            echo "::error::Frontend coverage $COVERAGE% is below required threshold of ${{ env.COVERAGE_THRESHOLD }}%."
+            echo "::error::Add more tests to increase coverage. Coverage report is available in artifacts."
+            echo "::error::View coverage report: open frontend/coverage/index.html"
+            echo "::error::To adjust threshold, modify COVERAGE_THRESHOLD in .github/workflows/ci.yml"
+            exit 1
+          fi
+          echo "✅ Coverage threshold met: $COVERAGE%"
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage-reports
+          path: |
+            frontend/coverage/
+
+  # Docker build validation - runs after lint and test jobs
+  build-docker:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [lint-backend, test-backend, lint-frontend, test-frontend]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Backend Docker image
+        id: build-backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: false
+          tags: backend:ci-${{ github.sha }}
+          cache-from: type=gha,scope=backend-ci
+          cache-to: type=gha,mode=max,scope=backend-ci
+        continue-on-error: false
+
+      - name: Handle Backend build failure
+        if: failure() && steps.build-backend.outcome == 'failure'
+        run: |
+          echo "❌ Backend Docker build failed"
+          echo "::error::Backend Docker image build failed. Check Dockerfile and dependencies."
+          echo "::error::To debug locally, run: cd backend && docker build -t backend:test ."
+          echo "::error::Common issues: missing dependencies in requirements.txt, incorrect COPY paths, or base image issues."
+          echo "::error::Check Dockerfile syntax: cd backend && docker build --progress=plain -t backend:test ."
+          echo "::error::Documentation: https://docs.docker.com/engine/reference/builder/"
+
+      - name: Build Frontend Docker image
+        id: build-frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: false
+          tags: frontend:ci-${{ github.sha }}
+          cache-from: type=gha,scope=frontend-ci
+          cache-to: type=gha,mode=max,scope=frontend-ci
+        continue-on-error: false
+
+      - name: Handle Frontend build failure
+        if: failure() && steps.build-frontend.outcome == 'failure'
+        run: |
+          echo "❌ Frontend Docker build failed"
+          echo "::error::Frontend Docker image build failed. Check Dockerfile and dependencies."
+          echo "::error::To debug locally, run: cd frontend && docker build -t frontend:test ."
+          echo "::error::Common issues: missing dependencies in package.json, incorrect COPY paths, or Node.js version mismatch."
+          echo "::error::Check Dockerfile syntax: cd frontend && docker build --progress=plain -t frontend:test ."
+          echo "::error::Documentation: https://docs.docker.com/engine/reference/builder/"
+
+      - name: Verify Docker builds
+        if: success()
+        run: |
+          echo "✅ Backend Docker image built successfully"
+          echo "✅ Frontend Docker image built successfully"
+          echo ""
+          echo "Both images are ready for deployment"
+
+  # Integration tests - runs after Docker builds complete
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [build-docker]
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env file for testing
+        run: |
+          cat > .env << EOF
+          POSTGRES_USER=testuser
+          POSTGRES_PASSWORD=testpass
+          POSTGRES_DB=testdb
+          POSTGRES_URL=postgresql://testuser:testpass@postgres:5432/testdb
+          EOF
+
+      - name: Start services with docker compose
+        id: compose-up
+        working-directory: infrastructure
+        run: |
+          echo "🚀 Starting all services..."
+          if ! docker compose up -d --build; then
+            echo "❌ Failed to start services with docker compose"
+            echo "::error::Docker compose failed to start services. Check docker-compose.yml for syntax errors."
+            echo "::error::To debug locally, run: cd infrastructure && docker compose up"
+            echo "::error::Validate syntax: cd infrastructure && docker compose config"
+            echo "::error::Ensure all required environment variables are set in .env file."
+            echo "::error::Documentation: https://docs.docker.com/compose/"
+            exit 1
+          fi
+          echo "✅ Services started"
+
+      - name: Wait for services to be healthy
+        timeout-minutes: 10
+        run: |
+          echo "⏳ Waiting for services to be healthy..."
+          
+          # Function to check if a service is healthy
+          check_health() {
+            local service=$1
+            local max_attempts=60
+            local attempt=0
+            
+            while [ $attempt -lt $max_attempts ]; do
+              if docker compose -f infrastructure/docker-compose.yml ps $service | grep -q "healthy\|running"; then
+                echo "✅ $service is ready"
+                return 0
+              fi
+              attempt=$((attempt + 1))
+              echo "⏳ Waiting for $service... (attempt $attempt/$max_attempts)"
+              sleep 5
+            done
+            
+            echo "❌ $service failed to become healthy"
+            echo "::error::Service $service did not become healthy within the timeout period."
+            echo "::error::Check the service logs in artifacts for details on why it failed to start."
+            echo "::error::To debug locally, run: docker compose -f infrastructure/docker-compose.yml up $service"
+            return 1
+          }
+          
+          # Wait for critical services
+          check_health postgres || exit 1
+          check_health redis || exit 1
+          check_health backend || exit 1
+          check_health frontend || exit 1
+          
+          echo "✅ All services are healthy and ready"
+
+      - name: Run integration tests
+        id: integration
+        run: |
+          echo "🧪 Running integration tests..."
+          
+          # Test backend health endpoint
+          echo "Testing backend health endpoint..."
+          BACKEND_HEALTH=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/v1/health)
+          if [ "$BACKEND_HEALTH" != "200" ]; then
+            echo "❌ Backend health check failed with status $BACKEND_HEALTH"
+            echo "::error::Backend health endpoint returned $BACKEND_HEALTH instead of 200."
+            echo "::error::Check backend logs in artifacts for details. Service may not have started correctly."
+            echo "::error::To debug locally: docker compose -f infrastructure/docker-compose.yml logs backend"
+            echo "::error::Common issues: Database connection failed, missing environment variables, port conflicts"
+            exit 1
+          fi
+          echo "✅ Backend health check passed"
+          
+          # Test backend version endpoint
+          echo "Testing backend version endpoint..."
+          BACKEND_VERSION=$(curl -s http://localhost:8000/api/v1/version)
+          if [ -z "$BACKEND_VERSION" ]; then
+            echo "❌ Backend version endpoint failed"
+            echo "::error::Backend version endpoint returned empty response."
+            echo "::error::Check backend logs in artifacts for details."
+            exit 1
+          fi
+          echo "✅ Backend version endpoint passed: $BACKEND_VERSION"
+          
+          # Test frontend accessibility
+          echo "Testing frontend accessibility..."
+          FRONTEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000)
+          if [ "$FRONTEND_STATUS" != "200" ]; then
+            echo "❌ Frontend accessibility check failed with status $FRONTEND_STATUS"
+            echo "::error::Frontend returned $FRONTEND_STATUS instead of 200."
+            echo "::error::Check frontend logs in artifacts for details. Service may not have started correctly."
+            echo "::error::To debug locally: docker compose -f infrastructure/docker-compose.yml logs frontend"
+            echo "::error::Common issues: Build failed, missing environment variables, port conflicts"
+            exit 1
+          fi
+          echo "✅ Frontend accessibility check passed"
+          
+          # Test service communication (backend to database)
+          echo "Testing backend database connectivity..."
+          BACKEND_DB=$(curl -s http://localhost:8000/api/v1/health | grep -o '"database":"[^"]*"' || echo "")
+          if [ -z "$BACKEND_DB" ]; then
+            echo "⚠️  Could not verify database connectivity from health endpoint"
+          else
+            echo "✅ Backend database connectivity verified"
+          fi
+          echo "✅ All integration tests passed"
+
+      - name: Collect logs before cleanup
+        if: always()
+        run: |
+          echo "📋 Collecting service logs..."
+          mkdir -p logs
+          docker compose -f infrastructure/docker-compose.yml logs --no-color > logs/all-services.log 2>&1 || true
+          docker compose -f infrastructure/docker-compose.yml logs --no-color backend > logs/backend.log 2>&1 || true
+          docker compose -f infrastructure/docker-compose.yml logs --no-color frontend > logs/frontend.log 2>&1 || true
+          docker compose -f infrastructure/docker-compose.yml logs --no-color postgres > logs/postgres.log 2>&1 || true
+          docker compose -f infrastructure/docker-compose.yml logs --no-color redis > logs/redis.log 2>&1 || true
+          docker compose -f infrastructure/docker-compose.yml logs --no-color traefik > logs/traefik.log 2>&1 || true
+          echo "✅ Logs collected"
+
+      - name: Upload service logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-logs
+          path: logs/
+          retention-days: 7
+
+      - name: Stop and clean up services
+        if: always()
+        working-directory: infrastructure
+        run: |
+          echo "🧹 Cleaning up services..."
+          docker compose down -v --remove-orphans
+          docker compose rm -f -v
+          echo "✅ Cleanup complete"

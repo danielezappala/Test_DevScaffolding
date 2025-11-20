@@ -1,0 +1,196 @@
+name: Docker Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Ensure only one workflow runs per PR/branch
+concurrency:
+  group: docker-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Default to GitHub Container Registry
+  # Override with DOCKER_REGISTRY secret for Docker Hub or other registries
+  REGISTRY: ${{ secrets.DOCKER_REGISTRY || 'ghcr.io' }}
+  BACKEND_IMAGE_NAME: ${{ github.repository }}/backend
+  FRONTEND_IMAGE_NAME: ${{ github.repository }}/frontend
+
+jobs:
+  # Build backend Docker image
+  build-backend:
+    name: Build Backend Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          # Use DOCKER_USERNAME for Docker Hub or other registries, fallback to github.actor for GHCR
+          username: ${{ secrets.DOCKER_USERNAME || github.actor }}
+          # Use DOCKER_PASSWORD for Docker Hub or other registries, fallback to GITHUB_TOKEN for GHCR
+          password: ${{ secrets.DOCKER_PASSWORD || secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Backend Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+          build-args: |
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+
+      - name: Handle Backend build failure
+        if: failure() && steps.build.outcome == 'failure'
+        run: |
+          echo "❌ Backend Docker build failed"
+          echo "::error::Backend Docker image build failed during Docker workflow."
+          echo "::error::To debug locally, run: cd backend && docker build -t backend:test ."
+          echo "::error::For detailed output: cd backend && docker build --progress=plain -t backend:test ."
+          echo "::error::Check that all dependencies are in requirements.txt and Dockerfile is correct."
+          echo "::error::Common issues: Missing system dependencies, incorrect Python version, network issues"
+          echo "::error::Documentation: https://docs.docker.com/engine/reference/builder/"
+
+      - name: Output image details
+        if: success()
+        run: |
+          echo "✅ Backend image built successfully"
+          echo "Tags: ${{ steps.meta.outputs.tags }}"
+          echo "Digest: ${{ steps.build.outputs.digest }}"
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "🚀 Image pushed to registry: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}"
+          else
+            echo "ℹ️  Image built but not pushed (not on main branch)"
+          fi
+
+  # Build frontend Docker image
+  build-frontend:
+    name: Build Frontend Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          # Use DOCKER_USERNAME for Docker Hub or other registries, fallback to github.actor for GHCR
+          username: ${{ secrets.DOCKER_USERNAME || github.actor }}
+          # Use DOCKER_PASSWORD for Docker Hub or other registries, fallback to GITHUB_TOKEN for GHCR
+          password: ${{ secrets.DOCKER_PASSWORD || secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Frontend Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+          build-args: |
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+
+      - name: Handle Frontend build failure
+        if: failure() && steps.build.outcome == 'failure'
+        run: |
+          echo "❌ Frontend Docker build failed"
+          echo "::error::Frontend Docker image build failed during Docker workflow."
+          echo "::error::To debug locally, run: cd frontend && docker build -t frontend:test ."
+          echo "::error::For detailed output: cd frontend && docker build --progress=plain -t frontend:test ."
+          echo "::error::Check that all dependencies are in package.json and Dockerfile is correct."
+          echo "::error::Common issues: Missing dependencies, incorrect Node.js version, build script errors"
+          echo "::error::Documentation: https://docs.docker.com/engine/reference/builder/"
+
+      - name: Output image details
+        if: success()
+        run: |
+          echo "✅ Frontend image built successfully"
+          echo "Tags: ${{ steps.meta.outputs.tags }}"
+          echo "Digest: ${{ steps.build.outputs.digest }}"
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "🚀 Image pushed to registry: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}"
+          else
+            echo "ℹ️  Image built but not pushed (not on main branch)"
+          fi
+
+  # Summary job to report overall status
+  build-summary:
+    name: Build Summary
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    if: always()
+    steps:
+      - name: Check build status
+        run: |
+          if [[ "${{ needs.build-backend.result }}" != "success" ]] || [[ "${{ needs.build-frontend.result }}" != "success" ]]; then
+            echo "❌ Docker build failed"
+            echo "Backend: ${{ needs.build-backend.result }}"
+            echo "Frontend: ${{ needs.build-frontend.result }}"
+            echo "::error::One or more Docker builds failed. Check the individual job logs for details."
+            echo "::error::Review the build-backend and build-frontend job outputs above."
+            echo "::error::Common fixes: Update Dockerfile, fix dependencies, check base image availability"
+            exit 1
+          else
+            echo "✅ All Docker images built successfully"
+            echo "Backend: ${{ needs.build-backend.result }}"
+            echo "Frontend: ${{ needs.build-frontend.result }}"
+          fi

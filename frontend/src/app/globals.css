@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Minimal black & white palette - shadcn inspired */
+    --background: 0 0% 100%;
+    /* pure white */
+    --foreground: 0 0% 3.9%;
+    /* almost black */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    /* black */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    /* very light gray */
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    /* light gray background */
+    --muted-foreground: 0 0% 45.1%;
+    /* medium gray text */
+    --accent: 0 0% 96.1%;
+    /* same as secondary for minimal look */
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    /* only red for destructive actions */
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    /* very light gray border */
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    /* black ring for focus */
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 3.9%;
+    /* almost black */
+    --foreground: 0 0% 98%;
+    /* almost white */
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    /* white */
+    --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%;
+    /* dark gray */
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%;
+    /* dark gray background */
+    --muted-foreground: 0 0% 63.9%;
+    /* medium gray text */
+    --accent: 0 0% 14.9%;
+    /* same as secondary */
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    /* darker red for dark mode */
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%;
+    /* dark gray border */
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    /* light gray ring */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+    background: var(--background);
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display), Georgia, serif;
+  }
+}

@@ -1,0 +1,41 @@
+# docker-compose.override.yml.example
+# Copy this file to docker-compose.override.yml and customize for your local environment
+# This file is gitignored and allows local development customizations
+
+version: '3.8'
+
+services:
+  backend:
+    # Uncomment to enable hot reload for development
+    # volumes:
+    #   - ../backend/app:/app/app:ro
+    environment:
+      - LOG_LEVEL=DEBUG
+      - RELOAD=true
+
+  frontend:
+    # Uncomment to enable hot reload for development
+    # volumes:
+    #   - ../frontend/src:/app/src:ro
+    environment:
+      - NODE_ENV=development
+
+  postgres:
+    # Uncomment to expose PostgreSQL port for local access
+    # ports:
+    #   - "5432:5432"
+
+  redis:
+    # Uncomment to expose Redis port for local access
+    # ports:
+    #   - "6379:6379"
+
+  traefik:
+    # Uncomment for local development without HTTPS
+    # command:
+    #   - "--api.insecure=true"
+    #   - "--providers.docker=true"
+    #   - "--entrypoints.web.address=:80"
+    # ports:
+    #   - "80:80"
+    #   - "8080:8080"

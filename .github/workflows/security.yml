@@ -1,0 +1,365 @@
+name: Security Scanning
+
+on:
+  # Run weekly on Sundays at midnight UTC
+  schedule:
+    - cron: '0 0 * * 0'
+  # Run on pull requests
+  pull_request:
+    branches:
+      - main
+      - develop
+  # Allow manual trigger
+  workflow_dispatch:
+
+# Ensure only one workflow runs per PR/branch
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "20"
+
+jobs:
+  scan-python-dependencies:
+    name: Scan Python Dependencies
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install pip-audit
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-audit
+
+      - name: Scan dependencies with pip-audit
+        run: |
+          echo "Scanning Python dependencies for vulnerabilities..."
+          pip-audit --requirement requirements.txt --format json --output audit-results.json || true
+          pip-audit --requirement requirements.txt --format markdown --output audit-results.md || true
+          
+          # Run again to get exit code for high-severity vulnerabilities
+          if ! pip-audit --requirement requirements.txt --vulnerability-service osv; then
+            echo "❌ Python dependency vulnerabilities detected"
+            echo "::error::High-severity vulnerabilities found in Python dependencies."
+            echo "::error::Review audit-results.md in artifacts for detailed vulnerability information."
+            echo "::error::To fix locally: Update vulnerable packages in requirements.txt"
+            echo "::error::Run 'pip-audit --requirement requirements.txt' locally to see all issues."
+            echo "::error::Documentation: https://pypi.org/project/pip-audit/"
+            exit 1
+          fi
+
+      - name: Upload Python audit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-security-audit
+          path: |
+            backend/audit-results.json
+            backend/audit-results.md
+          retention-days: 30
+
+      - name: Comment PR with Python vulnerabilities
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let comment = '## 🔒 Python Security Scan Results\n\n';
+            comment += '❌ **High-severity vulnerabilities detected in Python dependencies**\n\n';
+            
+            try {
+              const markdown = fs.readFileSync('backend/audit-results.md', 'utf8');
+              comment += markdown;
+            } catch (error) {
+              comment += 'See workflow logs for details.';
+            }
+            
+            comment += '\n\n### Remediation Steps\n';
+            comment += '1. Review the vulnerabilities listed above\n';
+            comment += '2. Update affected packages to secure versions\n';
+            comment += '3. Run `pip-audit` locally to verify fixes\n';
+            comment += '4. Update `requirements.txt` with patched versions\n';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  scan-node-dependencies:
+    name: Scan Node.js Dependencies
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Scan dependencies with npm audit
+        run: |
+          echo "Scanning Node.js dependencies for vulnerabilities..."
+          npm audit --json > audit-results.json || true
+          npm audit > audit-results.txt || true
+          
+          # Fail on high or critical vulnerabilities
+          if ! npm audit --audit-level=high; then
+            echo "❌ Node.js dependency vulnerabilities detected"
+            echo "::error::High-severity vulnerabilities found in Node.js dependencies."
+            echo "::error::Review audit-results.txt in artifacts for detailed vulnerability information."
+            echo "::error::To fix locally: Run 'npm audit fix' to automatically update packages."
+            echo "::error::For breaking changes: Run 'npm audit fix --force' (review changes carefully)."
+            echo "::error::Documentation: https://docs.npmjs.com/cli/v10/commands/npm-audit"
+            exit 1
+          fi
+
+      - name: Upload Node.js audit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nodejs-security-audit
+          path: |
+            frontend/audit-results.json
+            frontend/audit-results.txt
+          retention-days: 30
+
+      - name: Comment PR with Node.js vulnerabilities
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let comment = '## 🔒 Node.js Security Scan Results\n\n';
+            comment += '❌ **High-severity vulnerabilities detected in Node.js dependencies**\n\n';
+            
+            try {
+              const auditText = fs.readFileSync('frontend/audit-results.txt', 'utf8');
+              comment += '```\n' + auditText + '\n```\n';
+            } catch (error) {
+              comment += 'See workflow logs for details.';
+            }
+            
+            comment += '\n\n### Remediation Steps\n';
+            comment += '1. Review the vulnerabilities listed above\n';
+            comment += '2. Run `npm audit fix` to automatically fix issues\n';
+            comment += '3. For breaking changes, run `npm audit fix --force` (review changes carefully)\n';
+            comment += '4. Manually update packages that cannot be auto-fixed\n';
+            comment += '5. Run `npm audit` locally to verify all issues are resolved\n';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  scan-docker-images:
+    name: Scan Docker Images
+    runs-on: ubuntu-latest
+    # Make this job optional via repository variable
+    if: vars.ENABLE_DOCKER_SCANNING != 'false'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend image for scanning
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          tags: backend:scan
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build frontend image for scanning
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          tags: frontend:scan
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Trivy scanner on backend image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: backend:scan
+          format: 'sarif'
+          output: 'backend-trivy-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+
+      - name: Run Trivy scanner on frontend image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: frontend:scan
+          format: 'sarif'
+          output: 'frontend-trivy-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: '.'
+          category: 'trivy-docker-scan'
+
+      - name: Run Trivy scanner on backend (table format)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: backend:scan
+          format: 'table'
+          output: 'backend-trivy-report.txt'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+
+      - name: Run Trivy scanner on frontend (table format)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: frontend:scan
+          format: 'table'
+          output: 'frontend-trivy-report.txt'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+
+      - name: Check for critical vulnerabilities
+        run: |
+          echo "Checking for critical vulnerabilities in Docker images..."
+          
+          backend_critical=$(grep -c "CRITICAL" backend-trivy-report.txt || true)
+          frontend_critical=$(grep -c "CRITICAL" frontend-trivy-report.txt || true)
+          
+          echo "Backend critical vulnerabilities: $backend_critical"
+          echo "Frontend critical vulnerabilities: $frontend_critical"
+          
+          if [ "$backend_critical" -gt 0 ] || [ "$frontend_critical" -gt 0 ]; then
+            echo "❌ Critical vulnerabilities found in Docker images"
+            echo "::error::Critical vulnerabilities detected in Docker images."
+            echo "::error::Review Trivy scan reports in artifacts for detailed vulnerability information."
+            echo "::error::Common fixes: Update base images, update OS packages, update application dependencies."
+            echo "::error::To scan locally: trivy image <image-name>"
+            echo "::error::Documentation: https://aquasecurity.github.io/trivy/"
+            echo ""
+            echo "Backend report:"
+            cat backend-trivy-report.txt
+            echo ""
+            echo "Frontend report:"
+            cat frontend-trivy-report.txt
+            exit 1
+          else
+            echo "✅ No critical vulnerabilities found"
+          fi
+
+      - name: Upload Trivy scan reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-scan-reports
+          path: |
+            backend-trivy-results.sarif
+            frontend-trivy-results.sarif
+            backend-trivy-report.txt
+            frontend-trivy-report.txt
+          retention-days: 30
+
+      - name: Comment PR with Docker scan results
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let comment = '## 🔒 Docker Image Security Scan Results\n\n';
+            comment += '❌ **Critical vulnerabilities detected in Docker images**\n\n';
+            
+            comment += '### Backend Image\n';
+            try {
+              const backendReport = fs.readFileSync('backend-trivy-report.txt', 'utf8');
+              comment += '```\n' + backendReport + '\n```\n\n';
+            } catch (error) {
+              comment += 'See workflow logs for details.\n\n';
+            }
+            
+            comment += '### Frontend Image\n';
+            try {
+              const frontendReport = fs.readFileSync('frontend-trivy-report.txt', 'utf8');
+              comment += '```\n' + frontendReport + '\n```\n\n';
+            } catch (error) {
+              comment += 'See workflow logs for details.\n\n';
+            }
+            
+            comment += '### Remediation Steps\n';
+            comment += '1. Review the vulnerabilities listed above\n';
+            comment += '2. Update base images to latest secure versions\n';
+            comment += '3. Update OS packages in Dockerfile\n';
+            comment += '4. Update application dependencies\n';
+            comment += '5. Run Trivy locally: `trivy image <image-name>`\n';
+            comment += '6. Consider using distroless or minimal base images\n';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  security-summary:
+    name: Security Scan Summary
+    runs-on: ubuntu-latest
+    needs: [scan-python-dependencies, scan-node-dependencies, scan-docker-images]
+    if: always()
+    
+    steps:
+      - name: Check scan results
+        run: |
+          echo "Security Scan Summary"
+          echo "===================="
+          echo ""
+          echo "Python Dependencies: ${{ needs.scan-python-dependencies.result }}"
+          echo "Node.js Dependencies: ${{ needs.scan-node-dependencies.result }}"
+          echo "Docker Images: ${{ needs.scan-docker-images.result }}"
+          echo ""
+          
+          if [ "${{ needs.scan-python-dependencies.result }}" == "failure" ] || \
+             [ "${{ needs.scan-node-dependencies.result }}" == "failure" ] || \
+             [ "${{ needs.scan-docker-images.result }}" == "failure" ]; then
+            echo "❌ Security vulnerabilities detected"
+            echo "::error::One or more security scans failed. Review the individual scan job logs for details."
+            echo "::error::Check artifacts for detailed vulnerability reports."
+            echo "::error::Priority: Fix critical and high-severity vulnerabilities first."
+            echo "::error::Resources:"
+            echo "::error::  - Python: https://pypi.org/project/pip-audit/"
+            echo "::error::  - Node.js: https://docs.npmjs.com/cli/v10/commands/npm-audit"
+            echo "::error::  - Docker: https://aquasecurity.github.io/trivy/"
+            exit 1
+          else
+            echo "✅ No critical security vulnerabilities detected"
+          fi
