@@ -40,6 +40,7 @@ COPY --chown=appuser:appuser . .
 
 # Update PATH to include user-installed packages
 ENV PATH=/home/appuser/.local/bin:$PATH
+ENV PYTHONUNBUFFERED=1
 
 # Switch to non-root user
 USER appuser

@@ -7,12 +7,14 @@ from typing import AsyncGenerator
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.api.v1.router import api_router
 from app.config import settings
 from app.core.logging import setup_logging, log_request_middleware
 from app.core.metrics import setup_metrics, metrics_middleware
 from app.database import engine
+from sqlalchemy import text
 
 
 @asynccontextmanager
@@ -29,7 +31,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     # Test database connection
     try:
         async with engine.begin() as conn:
-            await conn.execute("SELECT 1")
+            await conn.execute(text("SELECT 1"))
     except Exception as e:
         print(f"Warning: Database connection failed: {e}")
     
@@ -64,6 +66,13 @@ def create_app() -> FastAPI:
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+    )
+
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key=settings.SECRET_KEY,
+        same_site="lax",
+        https_only=False,
     )
     
     # Custom middleware

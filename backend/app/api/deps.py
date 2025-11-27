@@ -2,7 +2,7 @@
 
 from typing import AsyncGenerator, Optional
 
-from fastapi import Depends, HTTPException, Header, status
+from fastapi import Depends, HTTPException, Header, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.session import session_store
@@ -87,3 +87,31 @@ async def get_optional_session(
         return await get_current_session(authorization)
     except HTTPException:
         return None
+
+
+async def get_current_user_from_session(request: Request) -> dict:
+    """
+    Dependency for getting current user from cookie-based session.
+    
+    This is used for OAuth-based authentication where the user info
+    is stored in the session cookie instead of a Bearer token.
+    
+    Args:
+        request: FastAPI Request object
+        
+    Returns:
+        User data dictionary from session
+        
+    Raises:
+        HTTPException: If user is not authenticated
+    """
+    user = request.session.get("user")
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        )
+    
+    return user
+

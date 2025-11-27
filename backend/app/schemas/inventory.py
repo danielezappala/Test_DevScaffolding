@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from enum import Enum
 from typing import Optional
-from decimal import Decimal
+# from decimal import Decimal
 
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 
@@ -48,7 +48,7 @@ class WineBase(BaseModel):
     vintage: int = Field(..., ge=1900, le=2100)
     type: WineType = WineType.OTHER
     denomination: Optional[str] = Field(None, max_length=100)  # DOCG, DOC, IGT, etc.
-    price: Decimal = Field(..., gt=0)
+    price: float = Field(..., gt=0)
     quantity: int = Field(default=0, ge=0)
     threshold: Optional[int] = Field(default=10, ge=0)
     barcode: Optional[str] = Field(None, max_length=50)
@@ -69,7 +69,7 @@ class WineUpdate(BaseModel):
     vintage: Optional[int] = Field(None, ge=1900, le=2100)
     type: Optional[WineType] = None
     denomination: Optional[str] = Field(None, max_length=100)
-    price: Optional[Decimal] = Field(None, gt=0)
+    price: Optional[float] = Field(None, gt=0)
     quantity: Optional[int] = Field(None, ge=0)
     threshold: Optional[int] = Field(None, ge=0)
     barcode: Optional[str] = Field(None, max_length=50)

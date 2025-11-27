@@ -75,6 +75,10 @@ class Settings(BaseSettings):
         description="API route prefix"
     )
 
+    # Google OAuth
+    GOOGLE_CLIENT_ID: str = Field(default="", description="Google Client ID")
+    GOOGLE_CLIENT_SECRET: str = Field(default="", description="Google Client Secret")
+
 
 # Global settings instance
 settings = Settings()
