@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { Wine } from "@/types";
+import { getWineTypeLabel } from "@/lib/wine-utils";
 
 interface WineCardProps {
   wine: Wine;
@@ -21,7 +22,7 @@ export function WineCard({ wine, href, actionsSlot, className }: WineCardProps) 
   const severity = getStockSeverity(wine);
   const infoItems = [
     { label: "Annata", value: wine.vintage },
-    { label: "Tipo", value: wine.type },
+    { label: "Tipo", value: getWineTypeLabel(wine) },
     { label: "Denominazione", value: wine.denomination ?? "—" },
     { label: "Fornitore", value: wine.supplier?.name ?? "—" },
   ];

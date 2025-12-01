@@ -89,17 +89,17 @@ export function DataTable<T>({
   const showEmptyState = !isLoading && data.length === 0;
 
   return (
-    <div className={cn("overflow-hidden rounded-2xl border border-border bg-card shadow-sm", className)}>
+    <div className={cn("overflow-hidden rounded-lg border border-gray-300 bg-white shadow-md", className)}>
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-border text-sm text-foreground">
-          <thead className="bg-secondary/60">
+        <table className="min-w-full text-sm text-gray-900">
+          <thead className="bg-gray-100 border-b border-gray-300">
             <tr>
               {selectable && (
                 <th scope="col" className="w-12 px-4 py-3">
                   <input
                     aria-label="Seleziona tutte le righe"
                     type="checkbox"
-                    className="h-4 w-4 rounded border-border text-primary"
+                    className="h-4 w-4 rounded border-gray-400 text-gray-900"
                     checked={allSelected}
                     onChange={handleToggleAll}
                   />
@@ -113,7 +113,7 @@ export function DataTable<T>({
                     key={column.id}
                     scope="col"
                     className={cn(
-                      "px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground",
+                      "px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-700",
                       column.align === "right" && "text-right",
                       column.align === "center" && "text-center",
                       column.className,
@@ -127,7 +127,7 @@ export function DataTable<T>({
                     <span className="inline-flex items-center gap-1">
                       {column.header}
                       {column.sortable && (
-                        <span className="text-[10px] text-foreground/70">
+                        <span className="text-[10px] text-gray-600">
                           {isSorted ? (direction === "asc" ? "↑" : "↓") : "↕"}
                         </span>
                       )}
@@ -137,10 +137,10 @@ export function DataTable<T>({
               })}
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/60">
+          <tbody className="divide-y divide-gray-300 bg-white">
             {isLoading && (
               <tr>
-                <td colSpan={columns.length + (selectable ? 1 : 0)} className="px-4 py-6 text-center text-sm text-muted-foreground">
+                <td colSpan={columns.length + (selectable ? 1 : 0)} className="px-4 py-6 text-center text-sm text-gray-600">
                   Caricamento dati...
                 </td>
               </tr>
@@ -151,13 +151,13 @@ export function DataTable<T>({
                 const rowId = rowIds[index];
                 const rowSelected = selectedSet.has(rowId);
                 return (
-                  <tr key={rowId} className="bg-background transition hover:bg-accent/40">
+                  <tr key={rowId} className="transition hover:bg-gray-100">
                     {selectable && (
                       <td className="px-4 py-3">
                         <input
                           aria-label="Seleziona riga"
                           type="checkbox"
-                          className="h-4 w-4 rounded border-border text-primary"
+                          className="h-4 w-4 rounded border-gray-400 text-gray-900"
                           checked={rowSelected}
                           onChange={() => handleToggleRow(rowId)}
                         />
@@ -171,7 +171,7 @@ export function DataTable<T>({
                         <td
                           key={`${column.id}-${rowId}`}
                           className={cn(
-                            "whitespace-nowrap px-4 py-3 text-sm text-foreground",
+                            "whitespace-nowrap px-4 py-3 text-sm font-medium text-gray-900",
                             column.align === "right" && "text-right",
                             column.align === "center" && "text-center",
                             column.className
@@ -187,7 +187,7 @@ export function DataTable<T>({
 
             {showEmptyState && (
               <tr>
-                <td colSpan={columns.length + (selectable ? 1 : 0)} className="px-4 py-6 text-center text-sm text-muted-foreground">
+                <td colSpan={columns.length + (selectable ? 1 : 0)} className="px-4 py-6 text-center text-sm text-gray-600">
                   {emptyState ?? "Nessun risultato trovato."}
                 </td>
               </tr>
@@ -197,14 +197,14 @@ export function DataTable<T>({
       </div>
 
       {pagination && (
-        <div className="flex items-center justify-between border-t border-border bg-secondary/40 px-4 py-3 text-xs text-muted-foreground">
+        <div className="flex items-center justify-between border-t border-gray-300 bg-gray-100 px-4 py-3 text-xs font-semibold text-gray-700">
           <span>
             Pagina {pagination.page} di {Math.max(1, Math.ceil(pagination.total / pagination.pageSize) || 1)}
           </span>
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="rounded-md border border-border px-3 py-1 text-sm font-semibold text-foreground transition disabled:opacity-50"
+              className="rounded-md border border-gray-400 bg-white px-3 py-1 text-sm font-semibold text-gray-900 transition hover:bg-gray-50 disabled:opacity-50"
               onClick={() => pagination.onPageChange?.(Math.max(1, pagination.page - 1))}
               disabled={pagination.page <= 1}
             >
@@ -212,7 +212,7 @@ export function DataTable<T>({
             </button>
             <button
               type="button"
-              className="rounded-md border border-border px-3 py-1 text-sm font-semibold text-foreground transition disabled:opacity-50"
+              className="rounded-md border border-gray-400 bg-white px-3 py-1 text-sm font-semibold text-gray-900 transition hover:bg-gray-50 disabled:opacity-50"
               onClick={() => pagination.onPageChange?.(pagination.page + 1)}
               disabled={pagination.page * pagination.pageSize >= pagination.total}
             >

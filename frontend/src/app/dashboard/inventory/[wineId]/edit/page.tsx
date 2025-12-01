@@ -1,6 +1,6 @@
-"use client";
 import { notFound } from "next/navigation";
-import { inventoryApi, ApiClientError } from "@/lib/api";
+import { ApiClientError } from "@/lib/api";
+import { serverInventoryApi } from "@/lib/server-api";
 import { WineForm } from "../../_components/wine-form";
 
 interface PageProps {
@@ -17,7 +17,7 @@ export default async function EditWinePage({ params }: PageProps) {
 
   let wine;
   try {
-    wine = await inventoryApi.getWine(wineId);
+    wine = await serverInventoryApi.getWine(wineId);
   } catch (error) {
     if (error instanceof ApiClientError && error.status === 404) {
       notFound();
@@ -25,7 +25,7 @@ export default async function EditWinePage({ params }: PageProps) {
     throw error;
   }
 
-  const suppliers = await inventoryApi.listSuppliers();
+  const suppliers = await serverInventoryApi.listSuppliers();
 
   return (
     <div className="space-y-6">

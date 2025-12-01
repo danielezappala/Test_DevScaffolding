@@ -5,6 +5,8 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 
+from app.schemas.localization import Localization
+
 class WineType(str, Enum):
     RED = "red"
     WHITE = "white"
@@ -49,8 +51,9 @@ class WineBase(BaseModel):
     type: WineType = WineType.OTHER
     denomination: Optional[str] = Field(None, max_length=100)  # DOCG, DOC, IGT, etc.
     price: float = Field(..., gt=0)
-    quantity: int = Field(default=0, ge=0)
-    threshold: Optional[int] = Field(default=10, ge=0)
+    quantity: int = Field(default=0, ge=0)  # Always in bottles
+    threshold: Optional[int] = Field(default=10, ge=0)  # In bottles
+    bottles_per_package: int = Field(default=6, ge=1)  # Bottles per package/case
     barcode: Optional[str] = Field(None, max_length=50)
     supplier_id: Optional[int] = None
     notes: Optional[str] = None
@@ -72,6 +75,7 @@ class WineUpdate(BaseModel):
     price: Optional[float] = Field(None, gt=0)
     quantity: Optional[int] = Field(None, ge=0)
     threshold: Optional[int] = Field(None, ge=0)
+    bottles_per_package: Optional[int] = Field(None, ge=1)
     barcode: Optional[str] = Field(None, max_length=50)
     supplier_id: Optional[int] = None
     notes: Optional[str] = None
@@ -80,6 +84,7 @@ class WineRead(WineBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    type_label: Localization | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -96,6 +101,7 @@ class WineCriticalStock(BaseModel):
     threshold: Optional[int]
     severity: str  # "critical" or "warning"
     supplier: Optional[SupplierRead] = None
+    type_label: Localization | None = None
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -136,10 +142,15 @@ class MovementType(str, Enum):
     OUT = "out"
     ADJUST = "adjust"
 
+class UnitOfMeasure(str, Enum):
+    BOTTLE = "BOTTLE"
+    PACKAGE = "PACKAGE"
+
 class StockMovementBase(BaseModel):
     wine_id: int
     type: MovementType
-    quantity: int = Field(..., gt=0)
+    quantity: int = Field(..., gt=0)  # Quantity in the specified unit
+    unit: UnitOfMeasure = UnitOfMeasure.BOTTLE  # Unit of measure
     lot_id: Optional[int] = None
     note: Optional[str] = None
     reference: Optional[str] = Field(None, max_length=100)
@@ -149,8 +160,16 @@ class StockMovementCreate(StockMovementBase):
 
 class StockMovementRead(StockMovementBase):
     id: int
+    quantity_in_unit: int  # Original quantity in the specified unit
     timestamp: datetime
     user_id: Optional[int] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+class StockMovementUpdate(BaseModel):
+    """Schema for updating stock movement data"""
+    note: Optional[str] = None
+    reference: Optional[str] = Field(None, max_length=100)
 
     model_config = ConfigDict(from_attributes=True)
 

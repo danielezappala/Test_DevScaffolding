@@ -1,4 +1,3 @@
-"use client";
 import { SupplierForm } from "../_components/supplier-form";
 
 export default function NewSupplierPage() {

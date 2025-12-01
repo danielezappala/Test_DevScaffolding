@@ -18,6 +18,11 @@ export interface ApiErrorResponse {
   details?: unknown;
 }
 
+export interface Localization {
+  it: string;
+  en: string;
+}
+
 export type WineType = "red" | "white" | "rose" | "sparkling" | "dessert" | "other";
 
 export interface SupplierBase {
@@ -46,6 +51,7 @@ export interface WineBase {
   price: number;
   quantity: number;
   threshold?: number | null;
+  bottles_per_package: number;
   barcode?: string | null;
   supplier_id?: number | null;
   notes?: string | null;
@@ -56,6 +62,7 @@ export interface Wine extends WineBase {
   created_at: string;
   updated_at: string;
   supplier?: Supplier | null;
+  type_label?: Localization | null;
 }
 
 export type WineCreate = WineBase;
@@ -69,14 +76,17 @@ export interface WineCriticalStock {
   threshold?: number | null;
   severity: "critical" | "warning";
   supplier?: Supplier | null;
+  type_label?: Localization | null;
 }
 
 export type MovementType = "in" | "out" | "adjust";
+export type UnitOfMeasure = "bottle" | "package";
 
 export interface StockMovementBase {
   wine_id: number;
   type: MovementType;
   quantity: number;
+  unit: UnitOfMeasure;
   lot_id?: number | null;
   note?: string | null;
   reference?: string | null;
@@ -84,6 +94,7 @@ export interface StockMovementBase {
 
 export interface StockMovement extends StockMovementBase {
   id: number;
+  quantity_in_unit: number;
   timestamp: string;
   user_id?: number | null;
   wine_name?: string | null;

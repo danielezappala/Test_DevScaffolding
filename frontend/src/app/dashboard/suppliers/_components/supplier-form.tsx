@@ -6,6 +6,7 @@ import { inventoryApi } from "@/lib/api";
 import type { Supplier } from "@/types";
 import { FormInput, FormTextArea } from "@/components/form-input";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/button";
 
 interface SupplierFormProps {
   initialData?: Supplier;
@@ -18,18 +19,28 @@ export function SupplierForm({ initialData, supplierId, mode }: SupplierFormProp
   const [isPending, startTransition] = React.useTransition();
   const [status, setStatus] = React.useState<{ type: "idle" | "success" | "error"; message?: string }>({ type: "idle" });
 
-  const [formData, setFormData] = React.useState({
+  const initialFormData = React.useMemo(() => ({
     name: initialData?.name ?? "",
     contact_email: initialData?.contact_email ?? "",
     phone: initialData?.phone ?? "",
     address: initialData?.address ?? "",
     vat_number: initialData?.vat_number ?? "",
     notes: initialData?.notes ?? "",
-  });
+  }), [initialData]);
+
+  const [formData, setFormData] = React.useState(initialFormData);
+
+  // Rileva se ci sono modifiche
+  const hasChanges = React.useMemo(() => {
+    return Object.keys(formData).some(
+      (key) => formData[key as keyof typeof formData] !== initialFormData[key as keyof typeof initialFormData]
+    );
+  }, [formData, initialFormData]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setStatus({ type: "idle" }); // Reset status on change
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -97,13 +108,13 @@ export function SupplierForm({ initialData, supplierId, mode }: SupplierFormProp
       )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <button
+        <Button
           type="submit"
-          disabled={isPending}
-          className="inline-flex items-center gap-2 rounded-full border border-primary/70 bg-primary/15 px-6 py-2 text-sm font-semibold text-primary-foreground transition hover:border-primary hover:bg-primary/25 disabled:opacity-50"
+          disabled={isPending || !hasChanges || !formData.name.trim()}
+          variant="primary"
         >
           {isPending ? "Salvataggio..." : "Salva"}
-        </button>
+        </Button>
         <button type="button" onClick={() => router.back()} className="text-sm font-semibold text-muted-foreground underline-offset-4 hover:underline">
           Annulla
         </button>

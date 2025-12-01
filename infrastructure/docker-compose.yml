@@ -30,7 +30,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:6432/${POSTGRES_DB}
+      - DATABASE_URL=${DATABASE_URL}
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=SL3jL_5pf7HDpIBIWy1MCLhIVobI-_WuxtR71_NLN2Y
       - APP_VERSION=0.1.0
@@ -42,11 +42,7 @@ services:
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips '*'
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
-        condition: service_started
-      pgbouncer:
         condition: service_started
     networks:
       - test-devscaffolding-network
@@ -114,6 +110,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    profiles:
+      - with-db
 
   pgbouncer:
     image: edoburu/pgbouncer:latest
@@ -131,6 +129,8 @@ services:
         condition: service_healthy
     networks:
       - test-devscaffolding-network
+    profiles:
+      - with-db
 
   redis:
     image: redis:7-alpine

@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     """
     
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=(".env", ".env.local"),
         env_file_encoding="utf-8",
         case_sensitive=True,
         extra="ignore",
@@ -78,6 +78,12 @@ class Settings(BaseSettings):
     # Google OAuth
     GOOGLE_CLIENT_ID: str = Field(default="", description="Google Client ID")
     GOOGLE_CLIENT_SECRET: str = Field(default="", description="Google Client Secret")
+    
+    # Development mode
+    DEV_MODE_NO_AUTH: bool = Field(
+        default=False,
+        description="Bypass authentication in development mode"
+    )
 
 
 # Global settings instance

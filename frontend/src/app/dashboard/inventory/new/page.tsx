@@ -1,9 +1,8 @@
-"use client";
-import { inventoryApi } from "@/lib/api";
+import { serverInventoryApi } from "@/lib/server-api";
 import { WineForm } from "../_components/wine-form";
 
 export default async function NewWinePage() {
-  const suppliers = await inventoryApi.listSuppliers();
+  const suppliers = await serverInventoryApi.listSuppliers();
 
   return (
     <div className="space-y-6">

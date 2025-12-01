@@ -9,7 +9,7 @@ interface SeverityControlsProps {
 const severityOptions: { label: string; value: SeverityControlsProps["severity"] }[] = [
   { label: "Tutti", value: "all" },
   { label: "Critici", value: "critical" },
-  { label: "Warning", value: "warning" },
+  { label: "Attenzione", value: "warning" },
 ];
 
 export function SeverityControls({ severity = "all" }: SeverityControlsProps) {
@@ -36,8 +36,14 @@ export function SeverityControls({ severity = "all" }: SeverityControlsProps) {
             key={option.value}
             type="button"
             onClick={() => update(option.value ?? undefined)}
-            className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
-              isActive ? "bg-primary/15 text-primary-foreground" : "text-muted-foreground"
+            className={`rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wide transition ${
+              isActive 
+                ? option.value === "critical"
+                  ? "border-2 border-earth-brick bg-earth-brick text-white"
+                  : option.value === "warning"
+                    ? "border-2 border-earth-terracotta bg-earth-terracotta text-white"
+                    : "border-2 border-earth-sage bg-earth-sage text-white"
+                : "border-2 border-gray-300 bg-white text-gray-600 hover:border-gray-400"
             }`}
           >
             {option.label}

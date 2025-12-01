@@ -8,8 +8,8 @@ export default function LoginPage() {
     const handleLogin = () => {
         setIsLoading(true);
         // Redirect to backend Google login endpoint
-        // Use relative path for browser to ensure it goes through Traefik correctly
-        const apiUrl = "/test-devscaffolding/api/v1";
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+        const apiUrl = `${basePath}/api/v1`;
         window.location.href = `${apiUrl}/auth/login`;
     };
 

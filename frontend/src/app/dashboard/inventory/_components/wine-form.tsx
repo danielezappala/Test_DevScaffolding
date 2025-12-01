@@ -3,18 +3,16 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { inventoryApi } from "@/lib/api";
-import type { Supplier, Wine } from "@/types";
+import type { Supplier, Wine, WineType } from "@/types";
 import { FormInput, FormSelect, FormTextArea } from "@/components/form-input";
 import { cn } from "@/lib/utils";
+import { wineTypeLabels } from "@/lib/wine-utils";
+import { Button } from "@/components/button";
 
-const wineTypeOptions = [
-  { label: "Rosso", value: "red" },
-  { label: "Bianco", value: "white" },
-  { label: "Rosato", value: "rose" },
-  { label: "Spumante", value: "sparkling" },
-  { label: "Dessert", value: "dessert" },
-  { label: "Altro", value: "other" },
-];
+const wineTypeOptions = (Object.keys(wineTypeLabels) as WineType[]).map((key) => ({
+  label: wineTypeLabels[key],
+  value: key,
+}));
 
 interface WineFormProps {
   suppliers: Supplier[];
@@ -193,13 +191,13 @@ export function WineForm({ suppliers, initialData, wineId, mode }: WineFormProps
       )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <button
+        <Button
           type="submit"
           disabled={isPending}
-          className="inline-flex items-center gap-2 rounded-full border border-primary/70 bg-primary/15 px-6 py-2 text-sm font-semibold text-primary-foreground transition hover:border-primary hover:bg-primary/25 disabled:opacity-50"
+          variant="primary"
         >
           {isPending ? "Salvataggio..." : "Salva vino"}
-        </button>
+        </Button>
         <button
           type="button"
           onClick={() => router.back()}

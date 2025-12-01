@@ -3,22 +3,25 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { inventoryApi } from "@/lib/api";
-import type { MovementType, Wine } from "@/types";
+import type { MovementType, UnitOfMeasure, Wine } from "@/types";
 import { FormInput, FormSelect, FormTextArea } from "@/components/form-input";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/button";
 
 interface MovementFormProps {
   wines: Wine[];
+  preselectedWineId?: number;
 }
 
-export function MovementForm({ wines }: MovementFormProps) {
+export function MovementForm({ wines, preselectedWineId }: MovementFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = React.useTransition();
   const [status, setStatus] = React.useState<{ type: "idle" | "success" | "error"; message?: string }>({ type: "idle" });
   const [formData, setFormData] = React.useState({
-    wine_id: "",
+    wine_id: preselectedWineId ? String(preselectedWineId) : "",
     type: "in" as MovementType,
     quantity: "0",
+    unit: "bottle" as UnitOfMeasure,
     lot_id: "",
     note: "",
     reference: "",
@@ -37,6 +40,7 @@ export function MovementForm({ wines }: MovementFormProps) {
           wine_id: Number(formData.wine_id),
           type: formData.type,
           quantity: Number(formData.quantity),
+          unit: formData.unit,
           lot_id: formData.lot_id ? Number(formData.lot_id) : undefined,
           note: formData.note || undefined,
           reference: formData.reference || undefined,
@@ -80,7 +84,7 @@ export function MovementForm({ wines }: MovementFormProps) {
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <FormInput
           id="quantity"
           name="quantity"
@@ -90,6 +94,18 @@ export function MovementForm({ wines }: MovementFormProps) {
           required
           value={formData.quantity}
           onChange={handleChange}
+        />
+        <FormSelect
+          id="unit"
+          name="unit"
+          label="Unità"
+          required
+          value={formData.unit}
+          onChange={handleChange}
+          options={[
+            { label: "Bottiglie", value: "bottle" },
+            { label: "Confezioni", value: "package" },
+          ]}
         />
         <FormInput
           id="reference"
@@ -123,13 +139,13 @@ export function MovementForm({ wines }: MovementFormProps) {
       )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <button
+        <Button
           type="submit"
           disabled={isPending}
-          className="inline-flex items-center gap-2 rounded-full border border-primary/70 bg-primary/15 px-6 py-2 text-sm font-semibold text-primary-foreground transition hover:border-primary hover:bg-primary/25 disabled:opacity-50"
+          variant="primary"
         >
           {isPending ? "Registrazione..." : "Registra movimento"}
-        </button>
+        </Button>
         <button type="button" onClick={() => router.back()} className="text-sm font-semibold text-muted-foreground underline-offset-4 hover:underline">
           Annulla
         </button>

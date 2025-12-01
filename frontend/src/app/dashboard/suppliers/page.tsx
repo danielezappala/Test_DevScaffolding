@@ -1,49 +1,26 @@
-"use client";
-import Link from "next/link";
-import { inventoryApi } from "@/lib/api";
-import { DataTable } from "@/components/data-table";
+import { Plus } from "lucide-react";
+import { serverInventoryApi } from "@/lib/server-api";
+import { SuppliersTable } from "./suppliers-table";
+import { Button } from "@/components/button";
 
 export default async function SuppliersPage() {
-  const suppliers = await inventoryApi.listSuppliers();
+  const suppliers = await serverInventoryApi.listSuppliers();
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-col gap-4 rounded-2xl border border-border bg-card px-6 py-6 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+    <div className="space-y-6 px-4 py-6 sm:px-6 md:px-8 lg:px-10">
+      <header className="flex flex-col gap-4 rounded-2xl border border-border bg-card px-4 py-6 shadow-sm sm:px-6 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Fornitori</p>
-          <h1 className="font-display text-3xl text-foreground">Anagrafica partner</h1>
+          <h1 className="font-display text-2xl text-foreground sm:text-3xl">Anagrafica partner</h1>
           <p className="text-sm text-muted-foreground">Gestisci cantine, distributori e contatti di riferimento.</p>
         </div>
-        <Link
-          href="/test-devscaffolding/dashboard/suppliers/new"
-          className="inline-flex items-center gap-2 rounded-full border border-primary/70 bg-primary/15 px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:border-primary hover:bg-primary/25"
-        >
-          + Nuovo fornitore
-        </Link>
+        <Button href="/dashboard/suppliers/new" variant="primary">
+          <Plus className="h-5 w-5" />
+          Nuovo fornitore
+        </Button>
       </header>
 
-      <DataTable
-        data={suppliers}
-        columns={[
-          { id: "name", header: "Nome", accessor: "name" },
-          { id: "email", header: "Email", accessor: "contact_email" },
-          { id: "phone", header: "Telefono", accessor: "phone" },
-          { id: "vat", header: "P. IVA", accessor: "vat_number" },
-          {
-            id: "actions",
-            header: "Azioni",
-            render: (supplier) => (
-              <Link
-                href={`/test-devscaffolding/dashboard/suppliers/${supplier.id}/edit`}
-                className="text-sm font-semibold text-primary-foreground underline-offset-4 hover:underline"
-              >
-                Modifica
-              </Link>
-            ),
-          },
-        ]}
-        emptyState="Nessun fornitore registrato."
-      />
+      <SuppliersTable suppliers={suppliers} />
     </div>
   );
 }

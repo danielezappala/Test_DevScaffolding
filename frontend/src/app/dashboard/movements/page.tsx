@@ -1,10 +1,10 @@
-"use client";
-import Link from "next/link";
-import { inventoryApi } from "@/lib/api";
+import { Plus } from "lucide-react";
+import { serverInventoryApi } from "@/lib/server-api";
 import type { MovementFilters } from "@/types";
-import { DataTable } from "@/components/data-table";
 import { MovementFilterControls } from "./_components/filter-controls";
 import { InventoryPaginationControls } from "../inventory/_components/pagination-controls";
+import { MovementsTable } from "./_components/movements-table";
+import { Button } from "@/components/button";
 
 const PER_PAGE = 25;
 
@@ -28,89 +28,33 @@ export default async function MovementsPage({ searchParams }: { searchParams?: S
     wine_id: wineId ? Number(wineId) : undefined,
   };
 
-  const [movements, wines] = await Promise.all([inventoryApi.listMovements(filters), inventoryApi.listWines({ limit: 100 })]);
+  const [movements, wines] = await Promise.all([serverInventoryApi.listMovements(filters), serverInventoryApi.listWines({ limit: 100 })]);
   const filteredMovements = search
     ? movements.filter((movement) => {
-        const haystack = `${movement.note ?? ""} ${movement.reference ?? ""}`.toLowerCase();
-        return haystack.includes(search.toLowerCase());
-      })
+      const haystack = `${movement.note ?? ""} ${movement.reference ?? ""}`.toLowerCase();
+      return haystack.includes(search.toLowerCase());
+    })
     : movements;
 
   const hasNext = movements.length === PER_PAGE;
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-col gap-4 rounded-2xl border border-border bg-card px-6 py-6 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+    <div className="space-y-6 px-4 py-6 sm:px-6 md:px-8 lg:px-10">
+      <header className="flex flex-col gap-4 rounded-2xl border border-border bg-card px-4 py-6 shadow-sm sm:px-6 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Movimenti</p>
-          <h1 className="font-display text-3xl text-foreground">Storico carichi/scarichi</h1>
+          <h1 className="font-display text-2xl text-foreground sm:text-3xl">Storico carichi/scarichi</h1>
           <p className="text-sm text-muted-foreground">Consulta i movimenti provenienti dall&apos;API inventory.</p>
         </div>
-        <Link
-          href="/test-devscaffolding/dashboard/movements/new"
-          className="inline-flex items-center gap-2 rounded-full border border-primary/70 bg-primary/15 px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:border-primary hover:bg-primary/25"
-        >
-          + Nuovo movimento
-        </Link>
+        <Button href="/dashboard/movements/new" variant="primary">
+          <Plus className="h-5 w-5" />
+          Nuovo movimento
+        </Button>
       </header>
 
       <MovementFilterControls wines={wines} search={search} type={(type as MovementFilters["type"]) ?? undefined} wineId={wineId ? Number(wineId) : undefined} />
 
-      <DataTable
-        data={filteredMovements}
-        columns={[
-          {
-            id: "type",
-            header: "Tipo",
-            render: (movement) => (
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${
-                  movement.type === "in"
-                    ? "bg-emerald-100/60 text-emerald-700"
-                    : movement.type === "out"
-                      ? "bg-destructive/10 text-destructive"
-                      : "bg-amber-100/60 text-amber-700"
-                }`}
-              >
-                {movement.type}
-              </span>
-            ),
-          },
-          {
-            id: "wine",
-            header: "Vino",
-            render: (movement) => {
-              const wine = wines.find((record) => record.id === movement.wine_id);
-              return wine ? (
-                <Link
-                  href={`/test-devscaffolding/dashboard/inventory/${wine.id}`}
-                  className="font-semibold text-primary-foreground underline-offset-4 hover:underline"
-                >
-                  {wine.name} {wine.vintage}
-                </Link>
-              ) : (
-                `ID ${movement.wine_id}`
-              );
-            },
-          },
-          {
-            id: "quantity",
-            header: "Quantità",
-            render: (movement) => `${movement.type === "out" ? "-" : "+"}${movement.quantity}`,
-          },
-          {
-            id: "note",
-            header: "Note",
-            render: (movement) => movement.note ?? "—",
-          },
-          {
-            id: "timestamp",
-            header: "Data",
-            render: (movement) => new Date(movement.timestamp).toLocaleString("it-IT", { dateStyle: "short", timeStyle: "short" }),
-          },
-        ]}
-        emptyState="Nessun movimento trovato per i filtri selezionati."
-      />
+      <MovementsTable movements={filteredMovements} wines={wines} />
 
       <InventoryPaginationControls page={page} hasNext={hasNext} />
     </div>

@@ -18,6 +18,8 @@ A production-ready monorepo application with FastAPI backend, Next.js frontend, 
 ## 📚 Quick Links
 
 - **[Testing Guide](./TESTING.md)** - How to test the API (Swagger UI + curl examples)
+- **[Docker Setup Guide](./docs/DOCKER_SETUP.md)** - Multi-project Docker/Colima management
+- **[Colima Troubleshooting](./docs/COLIMA_TROUBLESHOOTING.md)** - Fix common Colima issues
 - **[Backend README](./backend/README.md)** - Backend setup and development
 - **[Frontend README](./frontend/README.md)** - Frontend setup and development
 
@@ -67,7 +69,9 @@ For more information about the CI/CD pipelines, see [docs/CI_CD.md](docs/CI_CD.m
 
 ### Prerequisites
 
-- Docker and Docker Compose
+- **Docker**: Docker Desktop, Colima, or OrbStack
+  - **Colima (raccomandato per Mac)**: `brew install colima`
+  - Vedi [Docker Setup Guide](./docs/DOCKER_SETUP.md) per configurazione multi-progetto
 - Domain name pointing to your server (for production)
 - Ports 80 and 443 available
 
@@ -172,6 +176,16 @@ npm run test
 npm run lint
 npm run format
 ```
+
+### Avviare rapidamente tutti i servizi
+
+Per avviare frontend, backend e l'intero stack Docker (PostgreSQL, PgBouncer, Redis, Traefik, Prometheus) con un solo comando, assicurandoti prima che le porte richieste siano libere:
+
+```bash
+./scripts/start_services.sh
+```
+
+Lo script verifica le porte più comuni (3000, 8000, 5432, 6379, 8080, 80, 443, 9090, 6432) e termina automaticamente eventuali processi che le stanno utilizzando prima di eseguire `docker compose up -d`.
 
 ## Project Structure
 
@@ -391,6 +405,20 @@ docker compose ps
 ```
 
 ## Troubleshooting
+
+### Docker/Colima Issues
+
+Se hai problemi con Docker o Colima:
+
+```bash
+# Verifica Docker
+docker ps
+
+# Se fallisce, riavvia Colima
+./scripts/restart_colima.sh
+```
+
+Vedi la guida completa: [Colima Troubleshooting](./docs/COLIMA_TROUBLESHOOTING.md)
 
 ### Services won't start
 

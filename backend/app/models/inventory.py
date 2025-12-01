@@ -13,6 +13,10 @@ class WineType(str, enum.Enum):
     DESSERT = "dessert"
     OTHER = "other"
 
+class UnitOfMeasure(str, enum.Enum):
+    BOTTLE = "BOTTLE"
+    PACKAGE = "PACKAGE"
+
 class Supplier(Base):
     __tablename__ = "suppliers"
 
@@ -37,8 +41,9 @@ class Wine(Base):
     type = Column(Enum(WineType), nullable=False, default=WineType.OTHER, index=True)
     denomination = Column(String, nullable=True, index=True)  # DOCG, DOC, IGT, etc.
     price = Column(Numeric(10, 2), nullable=False)
-    quantity = Column(Integer, nullable=False, default=0)
-    threshold = Column(Integer, nullable=True, default=10)  # Soglia minima stock
+    quantity = Column(Integer, nullable=False, default=0)  # Always stored in bottles
+    threshold = Column(Integer, nullable=True, default=10)  # Soglia minima stock (in bottles)
+    bottles_per_package = Column(Integer, nullable=False, default=6)  # Bottles per package/case
     barcode = Column(String, unique=True, nullable=True, index=True)
     supplier_id = Column(Integer, ForeignKey("suppliers.id"), nullable=True, index=True)
     notes = Column(Text, nullable=True)
@@ -76,7 +81,9 @@ class StockMovement(Base):
     wine_id = Column(Integer, ForeignKey("wines.id"), nullable=False, index=True)
     lot_id = Column(Integer, ForeignKey("lots.id"), nullable=True, index=True)
     type = Column(Enum(MovementType), nullable=False, index=True)
-    quantity = Column(Integer, nullable=False)
+    quantity = Column(Integer, nullable=False)  # Always stored in bottles
+    unit = Column(Enum(UnitOfMeasure), nullable=False, default=UnitOfMeasure.BOTTLE)  # Unit used for input
+    quantity_in_unit = Column(Integer, nullable=False)  # Original quantity in the specified unit
     timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
     note = Column(Text, nullable=True)
     reference = Column(String, nullable=True, index=True)  # Riferimento ordine/documento

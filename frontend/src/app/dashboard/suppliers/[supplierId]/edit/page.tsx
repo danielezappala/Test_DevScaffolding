@@ -1,6 +1,6 @@
-"use client";
 import { notFound } from "next/navigation";
-import { inventoryApi, ApiClientError } from "@/lib/api";
+import { ApiClientError } from "@/lib/api";
+import { serverInventoryApi } from "@/lib/server-api";
 import { SupplierForm } from "../../_components/supplier-form";
 
 interface PageProps {
@@ -17,7 +17,7 @@ export default async function EditSupplierPage({ params }: PageProps) {
 
   let supplier;
   try {
-    const suppliers = await inventoryApi.listSuppliers();
+    const suppliers = await serverInventoryApi.listSuppliers();
     supplier = suppliers.find((record) => record.id === supplierId);
   } catch (error) {
     if (error instanceof ApiClientError && error.status === 404) {

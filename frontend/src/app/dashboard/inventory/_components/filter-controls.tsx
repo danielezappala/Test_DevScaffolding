@@ -4,15 +4,7 @@ import * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Supplier, WineType } from "@/types";
 import { FilterBar } from "@/components/filter-bar";
-
-const wineTypeLabels: Record<WineType, string> = {
-  red: "Rosso",
-  white: "Bianco",
-  rose: "Rosato",
-  sparkling: "Spumante",
-  dessert: "Passito",
-  other: "Altro",
-};
+import { wineTypeLabels } from "@/lib/wine-utils";
 
 export interface InventoryFilterControlsProps {
   suppliers: Supplier[];

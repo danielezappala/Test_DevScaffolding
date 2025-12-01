@@ -37,27 +37,30 @@ export function FilterBar({
   className,
 }: FilterBarProps) {
   return (
-    <div className={cn("flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between", className)}>
-      <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-center">
-        <div className="flex flex-1 items-center rounded-xl border border-border bg-background px-3 py-2 text-sm focus-within:border-primary/60 focus-within:ring-1 focus-within:ring-primary/40">
-          <span className="mr-2 text-muted-foreground">⌘K</span>
-          <input
-            type="search"
-            value={searchValue}
-            onChange={(event) => onSearchChange?.(event.target.value)}
-            placeholder={searchPlaceholder}
-            className="w-full bg-transparent text-foreground outline-none placeholder:text-muted-foreground"
-          />
+    <div className={cn("flex flex-col gap-4 rounded-lg border border-gray-300 bg-white p-5 shadow-md lg:flex-row lg:items-end lg:justify-between", className)}>
+      <div className="flex flex-1 flex-col gap-3 lg:flex-row lg:items-end">
+        <div className="flex flex-1 flex-col gap-1">
+          <label className="text-xs font-bold uppercase tracking-wide text-gray-600">Ricerca</label>
+          <div className="flex items-center rounded-lg border-2 border-gray-400 bg-white px-4 py-2.5 text-sm focus-within:border-gray-900 focus-within:ring-2 focus-within:ring-gray-900/20">
+            <span className="mr-2 text-gray-500">⌘K</span>
+            <input
+              type="search"
+              value={searchValue}
+              onChange={(event) => onSearchChange?.(event.target.value)}
+              placeholder={searchPlaceholder}
+              className="w-full bg-transparent text-gray-900 outline-none placeholder:text-gray-500"
+            />
+          </div>
         </div>
 
         {filters.map((filter) => {
           if (filter.type === "select") {
             return (
-              <label key={filter.id} className="flex flex-col text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <label key={filter.id} className="flex flex-col gap-1 text-xs font-bold uppercase tracking-wide text-gray-600">
                 {filter.label}
-                <div className="mt-1 rounded-xl border border-border bg-background px-3 py-2 text-sm focus-within:border-primary/60 focus-within:ring-1 focus-within:ring-primary/40">
+                <div className="rounded-lg border-2 border-gray-400 bg-white px-3 py-2.5 text-sm focus-within:border-gray-900 focus-within:ring-2 focus-within:ring-gray-900/20">
                   <select
-                    className="w-full bg-transparent text-foreground outline-none"
+                    className="min-w-[120px] bg-transparent font-semibold text-gray-900 outline-none"
                     value={(values[filter.id] as string | number | undefined) ?? ""}
                     onChange={(event) => onFilterChange?.(filter.id, event.target.value || undefined)}
                   >
@@ -79,13 +82,13 @@ export function FilterBar({
               <label
                 key={filter.id}
                 className={cn(
-                  "inline-flex cursor-pointer items-center gap-2 rounded-xl border border-border/70 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground transition hover:border-primary/50",
-                  checked && "border-primary/60 bg-primary/10 text-primary-foreground"
+                  "inline-flex cursor-pointer items-center gap-2 rounded-lg border-2 border-gray-400 bg-white px-3 py-2 text-xs font-bold uppercase tracking-wide text-gray-900 shadow-sm transition hover:border-gray-600 hover:bg-gray-50",
+                  checked && "border-gray-600 bg-gray-600 text-white hover:bg-gray-500"
                 )}
               >
                 <input
                   type="checkbox"
-                  className="h-4 w-4 rounded border-border text-primary focus:ring-primary/40"
+                  className="h-4 w-4 rounded border-gray-400 text-gray-600 focus:ring-gray-600/40"
                   checked={checked}
                   onChange={(event) => onFilterChange?.(filter.id, event.target.checked)}
                 />
@@ -103,7 +106,7 @@ export function FilterBar({
         {onReset && (
           <button
             type="button"
-            className="text-xs font-semibold uppercase tracking-wide text-muted-foreground underline-offset-4 hover:underline"
+            className="rounded-lg border-2 border-gray-400 bg-white px-4 py-2 text-xs font-bold uppercase tracking-wide text-gray-900 shadow-sm transition hover:border-gray-900 hover:bg-gray-50"
             onClick={onReset}
           >
             Reset filtri

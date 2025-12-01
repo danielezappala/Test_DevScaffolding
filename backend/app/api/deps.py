@@ -105,6 +105,17 @@ async def get_current_user_from_session(request: Request) -> dict:
     Raises:
         HTTPException: If user is not authenticated
     """
+    # Dev mode bypass for local development
+    from app.config import settings
+    if settings.DEV_MODE_NO_AUTH:
+        return {
+            "email": "dev@example.com",
+            "name": "Dev User",
+            "picture": "",
+            "sub": "dev-user-123",
+            "role": "admin"
+        }
+    
     user = request.session.get("user")
     
     if not user:

@@ -43,6 +43,25 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Palette terrosa personalizzata
+        earth: {
+          teal: "#1a4d4d",      // GREEN TEAL - per carico
+          sage: "#7a9b9b",      // SAGE - per info/riepilogo
+          terracotta: "#c86428", // TERRACOTTA - per scarico
+          brick: "#b83c2f",     // BRICK - per errori
+          taupe: "#c9b5a0",     // TAUPE - per neutri
+          "taupe-light": "#e8ddd0",
+          "taupe-dark": "#6b5d4f",
+        },
+        // Colori specifici per tipi di vino
+        wine: {
+          white: "#d4c78a",     // Bianco - giallo paglierino più spento
+          rose: "#d89ba8",      // Rosato - rosa salmone più tenue
+          red: "#7B0F1E",       // Rosso - rosso rubino
+          sparkling: "#e6dfa8", // Spumante - oro pallido più spento
+          sweet: "#b8873d",     // Passito/Dolce - ambrato più scuro
+          fortified: "#9d5a2e", // Fortificato - mogano più terroso
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
