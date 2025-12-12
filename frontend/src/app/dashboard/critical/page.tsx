@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { serverInventoryApi } from "@/lib/server-api";
 import { SeverityControls } from "./_components/severity-controls";
 import { Badge } from "@/components/badge";

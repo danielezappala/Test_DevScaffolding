@@ -15,33 +15,53 @@ class WineType(str, Enum):
     DESSERT = "dessert"
     OTHER = "other"
 
-# ===== Supplier Schemas =====
+class BarcodeType(str, Enum):
+    EAN13 = "EAN13"
+    CODE128 = "CODE128"
+    QR = "QR"
+    INTERNAL = "INTERNAL"
 
-class SupplierBase(BaseModel):
+class CompanyCategory(str, Enum):
+    PRODUCER = "PRODUCER"  # Produttore
+    DISTRIBUTOR = "DISTRIBUTOR"  # Distributore/Fornitore
+    BOTH = "BOTH"  # Sia Produttore che Distributore
+
+# ===== Company Schemas (Produttori e Fornitori) =====
+
+class CompanyBase(BaseModel):
+    """Anagrafica unificata per Produttori e Fornitori/Distributori"""
     name: str = Field(..., min_length=2, max_length=200)
+    category: CompanyCategory = Field(default=CompanyCategory.BOTH, description="Categoria: Produttore, Distributore, o entrambi")
     contact_email: Optional[str] = Field(None, max_length=255)
     phone: Optional[str] = Field(None, max_length=50)
     address: Optional[str] = None
     vat_number: Optional[str] = Field(None, max_length=50)
     notes: Optional[str] = None
 
-class SupplierCreate(SupplierBase):
+class CompanyCreate(CompanyBase):
     pass
 
-class SupplierUpdate(BaseModel):
+class CompanyUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=2, max_length=200)
+    category: Optional[CompanyCategory] = None
     contact_email: Optional[str] = Field(None, max_length=255)
     phone: Optional[str] = Field(None, max_length=50)
     address: Optional[str] = None
     vat_number: Optional[str] = Field(None, max_length=50)
     notes: Optional[str] = None
 
-class SupplierRead(SupplierBase):
+class CompanyRead(CompanyBase):
     id: int
     created_at: datetime
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+# Alias per retrocompatibilità
+SupplierBase = CompanyBase
+SupplierCreate = CompanyCreate
+SupplierUpdate = CompanyUpdate
+SupplierRead = CompanyRead
 
 # ===== Wine Schemas =====
 
@@ -54,8 +74,10 @@ class WineBase(BaseModel):
     quantity: int = Field(default=0, ge=0)  # Always in bottles
     threshold: Optional[int] = Field(default=10, ge=0)  # In bottles
     bottles_per_package: int = Field(default=6, ge=1)  # Bottles per package/case
-    barcode: Optional[str] = Field(None, max_length=50)
-    supplier_id: Optional[int] = None
+    barcode: Optional[str] = Field(None, max_length=20)
+    barcode_type: Optional[BarcodeType] = Field(default=BarcodeType.EAN13)
+    producer_id: Optional[int] = None  # Chi produce il vino
+    supplier_id: Optional[int] = None  # Da chi si acquista (distributore)
     notes: Optional[str] = None
 
 class WineCreate(WineBase):
@@ -65,6 +87,15 @@ class WineCreate(WineBase):
         current_year = datetime.now().year
         if v > current_year + 1:
             raise ValueError(f'Vintage cannot be more than one year in the future (max: {current_year + 1})')
+        return v
+    
+    @field_validator('barcode')
+    @classmethod
+    def validate_barcode(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and v.strip() == '':
+            raise ValueError('Barcode cannot be empty string')
+        if v is not None and not v.replace('-', '').replace('.', '').replace(' ', '').isalnum():
+            raise ValueError('Barcode must contain only alphanumeric characters, hyphens, dots, and spaces')
         return v
 
 class WineUpdate(BaseModel):
@@ -76,7 +107,9 @@ class WineUpdate(BaseModel):
     quantity: Optional[int] = Field(None, ge=0)
     threshold: Optional[int] = Field(None, ge=0)
     bottles_per_package: Optional[int] = Field(None, ge=1)
-    barcode: Optional[str] = Field(None, max_length=50)
+    barcode: Optional[str] = Field(None, max_length=20)
+    barcode_type: Optional[BarcodeType] = None
+    producer_id: Optional[int] = None
     supplier_id: Optional[int] = None
     notes: Optional[str] = None
 
@@ -89,8 +122,9 @@ class WineRead(WineBase):
     model_config = ConfigDict(from_attributes=True)
 
 class WineReadWithSupplier(WineRead):
-    """Wine with supplier details"""
-    supplier: Optional[SupplierRead] = None
+    """Wine with supplier and producer details"""
+    producer: Optional[CompanyRead] = None
+    supplier: Optional[CompanyRead] = None
 
 class WineCriticalStock(BaseModel):
     """Wine with critical stock information"""
@@ -100,7 +134,8 @@ class WineCriticalStock(BaseModel):
     quantity: int
     threshold: Optional[int]
     severity: str  # "critical" or "warning"
-    supplier: Optional[SupplierRead] = None
+    producer: Optional[CompanyRead] = None
+    supplier: Optional[CompanyRead] = None
     type_label: Localization | None = None
     
     model_config = ConfigDict(from_attributes=True)
@@ -172,6 +207,29 @@ class StockMovementUpdate(BaseModel):
     reference: Optional[str] = Field(None, max_length=100)
 
     model_config = ConfigDict(from_attributes=True)
+
+class MovementBarcodeCreate(BaseModel):
+    """Schema for creating movement by barcode"""
+    barcode: str = Field(..., description="Wine barcode")
+    type: MovementType = Field(..., description="in, out, or adjust")
+    quantity: int = Field(..., gt=0)
+    unit: UnitOfMeasure = Field(default=UnitOfMeasure.BOTTLE)
+    note: Optional[str] = None
+    reference: Optional[str] = Field(None, max_length=100)
+
+class BarcodeAssign(BaseModel):
+    """Schema for assigning barcode to wine"""
+    barcode: str = Field(..., min_length=1, max_length=20, description="Barcode to assign")
+    barcode_type: BarcodeType = Field(default=BarcodeType.EAN13, description="Type of barcode")
+    
+    @field_validator('barcode')
+    @classmethod
+    def validate_barcode(cls, v: str) -> str:
+        if v.strip() == '':
+            raise ValueError('Barcode cannot be empty string')
+        if not v.replace('-', '').replace('.', '').replace(' ', '').isalnum():
+            raise ValueError('Barcode must contain only alphanumeric characters, hyphens, dots, and spaces')
+        return v
 
 class StockMovementReadWithWine(StockMovementRead):
     """Movement with wine details"""

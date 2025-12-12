@@ -21,6 +21,7 @@ export function SupplierForm({ initialData, supplierId, mode }: SupplierFormProp
 
   const initialFormData = React.useMemo(() => ({
     name: initialData?.name ?? "",
+    category: initialData?.category ?? "BOTH",
     contact_email: initialData?.contact_email ?? "",
     phone: initialData?.phone ?? "",
     address: initialData?.address ?? "",
@@ -29,6 +30,29 @@ export function SupplierForm({ initialData, supplierId, mode }: SupplierFormProp
   }), [initialData]);
 
   const [formData, setFormData] = React.useState(initialFormData);
+  
+  // Gestione checkbox per categoria
+  const [isProducer, setIsProducer] = React.useState(
+    initialData?.category === "PRODUCER" || initialData?.category === "BOTH"
+  );
+  const [isDistributor, setIsDistributor] = React.useState(
+    initialData?.category === "DISTRIBUTOR" || initialData?.category === "BOTH"
+  );
+  
+  // Aggiorna category quando cambiano i checkbox
+  React.useEffect(() => {
+    let category: "PRODUCER" | "DISTRIBUTOR" | "BOTH";
+    if (isProducer && isDistributor) {
+      category = "BOTH";
+    } else if (isProducer) {
+      category = "PRODUCER";
+    } else if (isDistributor) {
+      category = "DISTRIBUTOR";
+    } else {
+      category = "BOTH"; // Default se nessuno selezionato
+    }
+    setFormData((prev) => ({ ...prev, category }));
+  }, [isProducer, isDistributor]);
 
   // Rileva se ci sono modifiche
   const hasChanges = React.useMemo(() => {
@@ -49,6 +73,7 @@ export function SupplierForm({ initialData, supplierId, mode }: SupplierFormProp
       try {
         const payload = {
           name: formData.name,
+          category: formData.category,
           contact_email: formData.contact_email || undefined,
           phone: formData.phone || undefined,
           address: formData.address || undefined,
@@ -61,12 +86,15 @@ export function SupplierForm({ initialData, supplierId, mode }: SupplierFormProp
           setStatus({ type: "success", message: "Fornitore creato." });
           setFormData({
             name: "",
+            category: "BOTH",
             contact_email: "",
             phone: "",
             address: "",
             vat_number: "",
             notes: "",
           });
+          setIsProducer(true);
+          setIsDistributor(true);
         } else if (mode === "edit" && supplierId) {
           await inventoryApi.updateSupplier(supplierId, payload);
           setStatus({ type: "success", message: "Fornitore aggiornato." });
@@ -85,6 +113,31 @@ export function SupplierForm({ initialData, supplierId, mode }: SupplierFormProp
       <div className="grid gap-4 md:grid-cols-2">
         <FormInput id="name" name="name" label="Nome" required value={formData.name} onChange={handleChange} placeholder="Cantina, distributore…" />
         <FormInput id="contact_email" name="contact_email" label="Email" type="email" value={formData.contact_email} onChange={handleChange} />
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-sm font-semibold text-foreground">Categoria</label>
+        <p className="text-xs text-muted-foreground">Seleziona una o entrambe le categorie</p>
+        <div className="flex flex-wrap gap-4">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isProducer}
+              onChange={(e) => setIsProducer(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-400 text-primary"
+            />
+            <span className="text-sm text-foreground">Produttore</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isDistributor}
+              onChange={(e) => setIsDistributor(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-400 text-primary"
+            />
+            <span className="text-sm text-foreground">Distributore</span>
+          </label>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

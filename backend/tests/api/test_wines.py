@@ -292,7 +292,7 @@ async def test_get_wine_by_barcode(consultatore_client: AsyncClient, admin_clien
     )
     
     # Lookup by barcode
-    response = await consultatore_client.get("/api/v1/inventory/barcode/TESTBARCODE123")
+    response = await consultatore_client.get("/api/v1/inventory/wines/barcode/TESTBARCODE123")
     
     assert response.status_code == 200
     data = response.json()
@@ -303,5 +303,5 @@ async def test_get_wine_by_barcode(consultatore_client: AsyncClient, admin_clien
 @pytest.mark.asyncio
 async def test_get_wine_by_barcode_not_found(consultatore_client: AsyncClient):
     """Test barcode lookup for non-existent barcode"""
-    response = await consultatore_client.get("/api/v1/inventory/barcode/NOTEXIST")
+    response = await consultatore_client.get("/api/v1/inventory/wines/barcode/NOTEXIST")
     assert response.status_code == 404

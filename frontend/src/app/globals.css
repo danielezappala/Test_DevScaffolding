@@ -4,69 +4,50 @@
 
 @layer base {
   :root {
-    /* Minimal black & white palette - shadcn inspired */
-    --background: 0 0% 100%;
-    /* pure white */
-    --foreground: 0 0% 3.9%;
-    /* almost black */
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    /* black */
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    /* very light gray */
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    /* light gray background */
-    --muted-foreground: 0 0% 45.1%;
-    /* medium gray text */
-    --accent: 0 0% 96.1%;
-    /* same as secondary for minimal look */
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    /* only red for destructive actions */
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    /* very light gray border */
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    /* black ring for focus */
+    /* Palette calda ispirata alle linee guida (bordeaux + ambra) */
+    --background: 40 13% 95%;
+    --foreground: 24 15% 20%;
+    --card: 40 13% 97%;
+    --card-foreground: 24 15% 20%;
+    --popover: 40 13% 97%;
+    --popover-foreground: 24 15% 20%;
+    --primary: 355 63% 29%;
+    --primary-foreground: 40 24% 94%;
+    --secondary: 38 47% 60%;
+    --secondary-foreground: 24 15% 20%;
+    --muted: 40 11% 83%;
+    --muted-foreground: 50 3% 47%;
+    --accent: 46 54% 81%;
+    --accent-foreground: 24 15% 20%;
+    --destructive: 6 59% 45%;
+    --destructive-foreground: 40 24% 94%;
+    --border: 40 11% 83%;
+    --input: 40 11% 83%;
+    --ring: 353 75% 24%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 0 0% 3.9%;
-    /* almost black */
-    --foreground: 0 0% 98%;
-    /* almost white */
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    /* white */
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    /* dark gray */
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    /* dark gray background */
-    --muted-foreground: 0 0% 63.9%;
-    /* medium gray text */
-    --accent: 0 0% 14.9%;
-    /* same as secondary */
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    /* darker red for dark mode */
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    /* dark gray border */
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    /* light gray ring */
+    /* Variante dark con accenti bordeaux */
+    --background: 24 24% 12%;
+    --foreground: 40 24% 92%;
+    --card: 24 20% 16%;
+    --card-foreground: 40 24% 92%;
+    --popover: 24 20% 16%;
+    --popover-foreground: 40 24% 92%;
+    --primary: 355 63% 60%;
+    --primary-foreground: 24 24% 12%;
+    --secondary: 38 35% 40%;
+    --secondary-foreground: 40 24% 92%;
+    --muted: 24 12% 28%;
+    --muted-foreground: 46 38% 76%;
+    --accent: 46 40% 32%;
+    --accent-foreground: 40 24% 92%;
+    --destructive: 6 59% 55%;
+    --destructive-foreground: 24 24% 12%;
+    --border: 24 14% 32%;
+    --input: 24 14% 32%;
+    --ring: 355 63% 60%;
   }
 }
 

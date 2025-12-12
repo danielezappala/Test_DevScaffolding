@@ -13,15 +13,28 @@ class WineType(str, enum.Enum):
     DESSERT = "dessert"
     OTHER = "other"
 
+class BarcodeType(str, enum.Enum):
+    EAN13 = "EAN13"
+    CODE128 = "CODE128"
+    QR = "QR"
+    INTERNAL = "INTERNAL"
+
 class UnitOfMeasure(str, enum.Enum):
     BOTTLE = "BOTTLE"
     PACKAGE = "PACKAGE"
 
-class Supplier(Base):
-    __tablename__ = "suppliers"
+class CompanyCategory(str, enum.Enum):
+    PRODUCER = "PRODUCER"  # Produttore
+    DISTRIBUTOR = "DISTRIBUTOR"  # Distributore/Fornitore
+    BOTH = "BOTH"  # Sia Produttore che Distributore
+
+class Company(Base):
+    """Anagrafica unificata per Produttori e Fornitori/Distributori"""
+    __tablename__ = "companies"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False, index=True)
+    category = Column(Enum(CompanyCategory), nullable=False, default=CompanyCategory.BOTH, index=True)
     contact_email = Column(String, nullable=True)
     phone = Column(String, nullable=True)
     address = Column(Text, nullable=True)
@@ -30,7 +43,12 @@ class Supplier(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
-    wines = relationship("Wine", back_populates="supplier")
+    # Relationships
+    wines_as_producer = relationship("Wine", foreign_keys="Wine.producer_id", back_populates="producer")
+    wines_as_supplier = relationship("Wine", foreign_keys="Wine.supplier_id", back_populates="supplier")
+
+# Manteniamo l'alias Supplier per retrocompatibilità
+Supplier = Company
 
 class Wine(Base):
     __tablename__ = "wines"
@@ -44,13 +62,16 @@ class Wine(Base):
     quantity = Column(Integer, nullable=False, default=0)  # Always stored in bottles
     threshold = Column(Integer, nullable=True, default=10)  # Soglia minima stock (in bottles)
     bottles_per_package = Column(Integer, nullable=False, default=6)  # Bottles per package/case
-    barcode = Column(String, unique=True, nullable=True, index=True)
-    supplier_id = Column(Integer, ForeignKey("suppliers.id"), nullable=True, index=True)
+    barcode = Column(String(20), unique=True, nullable=True, index=True)
+    barcode_type = Column(String(20), nullable=True, default="EAN13")
+    producer_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)  # Chi produce il vino
+    supplier_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)  # Da chi si acquista (distributore)
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
-    supplier = relationship("Supplier", back_populates="wines")
+    producer = relationship("Company", foreign_keys=[producer_id], back_populates="wines_as_producer")
+    supplier = relationship("Company", foreign_keys=[supplier_id], back_populates="wines_as_supplier")
     movements = relationship("StockMovement", back_populates="wine", cascade="all, delete-orphan")
     lots = relationship("Lot", back_populates="wine", cascade="all, delete-orphan")
 

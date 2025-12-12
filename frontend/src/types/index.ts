@@ -25,8 +25,11 @@ export interface Localization {
 
 export type WineType = "red" | "white" | "rose" | "sparkling" | "dessert" | "other";
 
-export interface SupplierBase {
+export type CompanyCategory = "PRODUCER" | "DISTRIBUTOR" | "BOTH";
+
+export interface CompanyBase {
   name: string;
+  category?: CompanyCategory;
   contact_email?: string | null;
   phone?: string | null;
   address?: string | null;
@@ -34,14 +37,20 @@ export interface SupplierBase {
   notes?: string | null;
 }
 
-export interface Supplier extends SupplierBase {
+export interface Company extends CompanyBase {
   id: number;
   created_at: string;
   updated_at: string;
 }
 
-export type SupplierCreate = SupplierBase;
-export type SupplierUpdate = Partial<SupplierBase>;
+export type CompanyCreate = CompanyBase;
+export type CompanyUpdate = Partial<CompanyBase>;
+
+// Alias per retrocompatibilità
+export type SupplierBase = CompanyBase;
+export type Supplier = Company;
+export type SupplierCreate = CompanyCreate;
+export type SupplierUpdate = CompanyUpdate;
 
 export interface WineBase {
   name: string;
@@ -53,6 +62,8 @@ export interface WineBase {
   threshold?: number | null;
   bottles_per_package: number;
   barcode?: string | null;
+  barcode_type?: string | null;
+  producer_id?: number | null;
   supplier_id?: number | null;
   notes?: string | null;
 }
@@ -61,7 +72,8 @@ export interface Wine extends WineBase {
   id: number;
   created_at: string;
   updated_at: string;
-  supplier?: Supplier | null;
+  producer?: Company | null;
+  supplier?: Company | null;
   type_label?: Localization | null;
 }
 
@@ -75,7 +87,8 @@ export interface WineCriticalStock {
   quantity: number;
   threshold?: number | null;
   severity: "critical" | "warning";
-  supplier?: Supplier | null;
+  producer?: Company | null;
+  supplier?: Company | null;
   type_label?: Localization | null;
 }
 
@@ -111,7 +124,8 @@ export interface WineFilters {
   type?: WineType | "all";
   vintage?: number;
   denomination?: string;
-  supplier_id?: number;
+  producer_id?: number;
+  supplier_id?: number; // Mantenuto per compatibilità con movimenti
   available_only?: boolean;
   below_threshold?: boolean;
 }

@@ -27,20 +27,22 @@ export function MovementsTable({ movements, wines }: MovementsTableProps) {
     }
 
     const sorted = [...movements].sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
+      type SortableValue = string | number;
+      let aValue: SortableValue;
+      let bValue: SortableValue;
 
       switch (sortState.columnId) {
         case "timestamp":
           aValue = new Date(a.timestamp).getTime();
           bValue = new Date(b.timestamp).getTime();
           break;
-        case "wine":
+        case "wine": {
           const wineA = wines.find((w) => w.id === a.wine_id);
           const wineB = wines.find((w) => w.id === b.wine_id);
           aValue = wineA?.name || "";
           bValue = wineB?.name || "";
           break;
+        }
         case "type":
           aValue = a.type;
           bValue = b.type;
@@ -160,7 +162,7 @@ export function MovementsTable({ movements, wines }: MovementsTableProps) {
                     variant="ghost"
                     size="sm"
                   >
-                    Vedi vino
+                    Dettagli
                   </Button>
                 )}
               </div>

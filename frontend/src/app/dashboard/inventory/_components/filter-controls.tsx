@@ -7,19 +7,19 @@ import { FilterBar } from "@/components/filter-bar";
 import { wineTypeLabels } from "@/lib/wine-utils";
 
 export interface InventoryFilterControlsProps {
-  suppliers: Supplier[];
+  companies: Supplier[]; // Produttori e Fornitori
   search?: string;
   type?: WineType | "all";
-  supplierId?: number;
+  producerId?: number;
   availableOnly?: boolean;
   belowThreshold?: boolean;
 }
 
 export function InventoryFilterControls({
-  suppliers,
+  companies,
   search = "",
   type,
-  supplierId,
+  producerId,
   availableOnly,
   belowThreshold,
 }: InventoryFilterControlsProps) {
@@ -30,11 +30,11 @@ export function InventoryFilterControls({
   const filterValues = React.useMemo<Record<string, string | number | boolean | undefined>>(
     () => ({
       type: type && type !== "all" ? type : "",
-      supplier_id: supplierId?.toString() ?? "",
+      producer_id: producerId?.toString() ?? "",
       available_only: availableOnly,
       below_threshold: belowThreshold,
     }),
-    [type, supplierId, availableOnly, belowThreshold]
+    [type, producerId, availableOnly, belowThreshold]
   );
 
   const updateQuery = React.useCallback(
@@ -56,7 +56,7 @@ export function InventoryFilterControls({
 
   const handleReset = React.useCallback(() => {
     const params = new URLSearchParams(searchParams?.toString());
-    ["q", "type", "supplier_id", "available_only", "below_threshold"].forEach((key) => params.delete(key));
+    ["q", "type", "producer_id", "available_only", "below_threshold"].forEach((key) => params.delete(key));
     const nextQuery = params.toString();
     router.push(nextQuery ? `${pathname}?${nextQuery}` : pathname);
   }, [pathname, router, searchParams]);
@@ -89,12 +89,12 @@ export function InventoryFilterControls({
           placeholder: "Tutte",
         },
         {
-          id: "supplier_id",
-          label: "Fornitore",
+          id: "producer_id",
+          label: "Produttore",
           type: "select",
-          options: suppliers.map((supplier) => ({
-            label: supplier.name,
-            value: supplier.id,
+          options: companies.map((company) => ({
+            label: company.name,
+            value: company.id,
           })),
           placeholder: "Tutti",
         },

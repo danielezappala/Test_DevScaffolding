@@ -16,7 +16,7 @@ export default async function SuppliersPage() {
         </div>
         <Button href="/dashboard/suppliers/new" variant="primary">
           <Plus className="h-5 w-5" />
-          Nuovo fornitore
+          Nuovo partner
         </Button>
       </header>
 

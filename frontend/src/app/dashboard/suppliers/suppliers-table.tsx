@@ -7,6 +7,7 @@ import { Button } from "@/components/button";
 interface Supplier {
   id: number;
   name: string;
+  category?: "PRODUCER" | "DISTRIBUTOR" | "BOTH";
   contact_email?: string | null;
   phone?: string | null;
   vat_number?: string | null;
@@ -25,13 +26,18 @@ export function SuppliersTable({ suppliers }: SuppliersTableProps) {
     }
 
     const sorted = [...suppliers].sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
+      type SortableValue = string | number;
+      let aValue: SortableValue;
+      let bValue: SortableValue;
 
       switch (sortState.columnId) {
         case "name":
           aValue = a.name || "";
           bValue = b.name || "";
+          break;
+        case "category":
+          aValue = a.category || "BOTH";
+          bValue = b.category || "BOTH";
           break;
         case "email":
           aValue = a.contact_email || "";
@@ -68,6 +74,19 @@ export function SuppliersTable({ suppliers }: SuppliersTableProps) {
       onSortChange={handleSortChange}
       columns={[
         { id: "name", header: "Nome", accessor: "name", sortable: true },
+        {
+          id: "category",
+          header: "Categoria",
+          sortable: true,
+          render: (supplier) => {
+            const categoryLabels = {
+              BOTH: "Distributore, Produttore",
+              DISTRIBUTOR: "Distributore",
+              PRODUCER: "Produttore",
+            };
+            return categoryLabels[supplier.category || "BOTH"];
+          },
+        },
         { id: "email", header: "Email", accessor: "contact_email", sortable: true },
         { id: "phone", header: "Telefono", accessor: "phone", sortable: true },
         { id: "vat", header: "P. IVA", accessor: "vat_number", sortable: true },

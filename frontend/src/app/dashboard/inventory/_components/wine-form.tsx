@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { inventoryApi } from "@/lib/api";
+import { ApiClientError, inventoryApi } from "@/lib/api";
 import type { Supplier, Wine, WineType } from "@/types";
 import { FormInput, FormSelect, FormTextArea } from "@/components/form-input";
 import { cn } from "@/lib/utils";
@@ -36,8 +36,9 @@ export function WineForm({ suppliers, initialData, wineId, mode }: WineFormProps
     price: initialData?.price ? Number(initialData.price).toString() : "",
     quantity: initialData?.quantity?.toString() ?? "0",
     threshold: initialData?.threshold?.toString() ?? "10",
+    bottles_per_package: initialData?.bottles_per_package?.toString() ?? "6",
     barcode: initialData?.barcode ?? "",
-    supplier_id: initialData?.supplier_id?.toString() ?? "",
+    producer_id: initialData?.producer_id?.toString() ?? "",
     notes: initialData?.notes ?? "",
   });
 
@@ -58,10 +59,13 @@ export function WineForm({ suppliers, initialData, wineId, mode }: WineFormProps
           price: Number(formData.price),
           quantity: Number(formData.quantity),
           threshold: formData.threshold ? Number(formData.threshold) : undefined,
+          bottles_per_package: Number(formData.bottles_per_package) || 1,
           barcode: formData.barcode || undefined,
-          supplier_id: formData.supplier_id ? Number(formData.supplier_id) : undefined,
+          producer_id: formData.producer_id ? Number(formData.producer_id) : undefined,
           notes: formData.notes || undefined,
         };
+
+        console.log("Payload being sent:", JSON.stringify(payload, null, 2));
 
         if (mode === "create") {
           await inventoryApi.createWine(payload);
@@ -74,8 +78,23 @@ export function WineForm({ suppliers, initialData, wineId, mode }: WineFormProps
 
         router.refresh();
       } catch (error) {
-        console.error(error);
-        setStatus({ type: "error", message: "Impossibile salvare il vino. Controlla i campi o riprova." });
+        console.error("Error saving wine:", error);
+        
+        // Extract error message from API response
+        let errorMessage = "Impossibile salvare il vino. Controlla i campi o riprova.";
+        
+        // Check if it's an ApiClientError with body
+        if (error instanceof ApiClientError) {
+          const body = error.body;
+          if (body && typeof body === "object" && "detail" in body) {
+            const detail = (body as { detail?: string }).detail;
+            if (detail) {
+              errorMessage = detail;
+            }
+          }
+        }
+        
+        setStatus({ type: "error", message: errorMessage });
       }
     });
   };
@@ -89,7 +108,7 @@ export function WineForm({ suppliers, initialData, wineId, mode }: WineFormProps
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
         <FormInput id="name" name="name" label="Nome vino" required value={formData.name} onChange={handleChange} placeholder="Es. Etna Rosso DOC" />
         <FormInput
           id="vintage"
@@ -147,6 +166,15 @@ export function WineForm({ suppliers, initialData, wineId, mode }: WineFormProps
           onChange={handleChange}
         />
         <FormInput
+          id="bottles_per_package"
+          name="bottles_per_package"
+          label="Bottiglie per collo"
+          type="number"
+          min="1"
+          value={formData.bottles_per_package}
+          onChange={handleChange}
+        />
+        <FormInput
           id="threshold"
           name="threshold"
           label="Soglia minima"
@@ -160,13 +188,13 @@ export function WineForm({ suppliers, initialData, wineId, mode }: WineFormProps
       <div className="grid gap-4 md:grid-cols-2">
         <FormInput id="barcode" name="barcode" label="Barcode" value={formData.barcode} onChange={handleChange} placeholder="Codice opzionale" />
         <FormSelect
-          id="supplier_id"
-          name="supplier_id"
-          label="Fornitore"
-          value={formData.supplier_id}
+          id="producer_id"
+          name="producer_id"
+          label="Produttore"
+          value={formData.producer_id}
           onChange={handleChange}
           options={suppliers.map((supplier) => ({ label: supplier.name, value: supplier.id }))}
-          placeholder="Seleziona fornitore"
+          placeholder="Seleziona produttore"
         />
       </div>
 

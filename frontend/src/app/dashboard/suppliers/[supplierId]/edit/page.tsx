@@ -33,8 +33,8 @@ export default async function EditSupplierPage({ params }: PageProps) {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-xs uppercase tracking-wide text-muted-foreground">Fornitori</p>
-        <h1 className="font-display text-3xl text-foreground">Modifica fornitore</h1>
+        <p className="text-xs uppercase tracking-wide text-muted-foreground">Partner</p>
+        <h1 className="font-display text-3xl text-foreground">Modifica partner</h1>
       </header>
       <SupplierForm mode="edit" initialData={supplier} supplierId={supplier.id} />
     </div>

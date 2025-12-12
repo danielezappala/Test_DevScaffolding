@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { LayoutDashboard, Package, TrendingUp, Users, AlertTriangle } from "lucide-react";
+import { LayoutDashboard, Package, TrendingUp, Users, AlertTriangle, Scan } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, color: "taupe-dark" },
+    { label: "Quick Scan", href: "/dashboard/quick-scan", icon: Scan, color: "teal" },
     { label: "Inventario", href: "/dashboard/inventory", icon: Package, color: "teal" },
     { label: "Movimenti", href: "/dashboard/movements", icon: TrendingUp, color: "sage" },
     { label: "Fornitori", href: "/dashboard/suppliers", icon: Users, color: "taupe" },

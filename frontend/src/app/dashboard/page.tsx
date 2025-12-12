@@ -9,7 +9,7 @@ import type { StockMovement, Wine, WineCriticalStock } from "@/types";
 const quickActions = [
   { label: "Carico", desc: "Registra ingresso stock", tone: "primary", href: "/dashboard/movements/new?type=in" },
   { label: "Scarico", desc: "Registra uscita stock", tone: "accent", href: "/dashboard/movements/new?type=out" },
-  { label: "Nuovo fornitore", desc: "Aggiungi partner", tone: "muted", href: "/dashboard/suppliers/new" },
+  { label: "Nuovo partner", desc: "Aggiungi produttore/distributore", tone: "muted", href: "/dashboard/suppliers/new" },
 ];
 
 export default function DashboardPage() {

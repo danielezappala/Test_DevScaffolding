@@ -8,7 +8,6 @@ import { DataTable, type SortDirection } from "@/components/data-table";
 import type { Wine, Supplier, WineCriticalStock, WineFilters } from "@/types";
 import { InventoryFilterControls } from "./_components/filter-controls";
 import { InventoryPaginationControls } from "./_components/pagination-controls";
-import { cn } from "@/lib/utils";
 import { getWineTypeLabel } from "@/lib/wine-utils";
 import { getWineBadgeVariant } from "@/lib/wine-badge-utils";
 import { Button } from "@/components/button";
@@ -16,10 +15,10 @@ import { Badge } from "@/components/badge";
 
 interface WinesTableProps {
   wines: Wine[];
-  suppliers: Supplier[];
+  companies: Supplier[]; // Produttori e Fornitori
 }
 
-function WinesTable({ wines, suppliers }: WinesTableProps) {
+function WinesTable({ wines, companies }: WinesTableProps) {
   const [sortState, setSortState] = useState<{ columnId?: string; direction?: SortDirection }>({});
 
   const sortedWines = useMemo(() => {
@@ -28,8 +27,9 @@ function WinesTable({ wines, suppliers }: WinesTableProps) {
     }
 
     const sorted = [...wines].sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
+      type SortablePrimitive = string | number;
+      let aValue: SortablePrimitive;
+      let bValue: SortablePrimitive;
 
       switch (sortState.columnId) {
         case "name":
@@ -52,12 +52,20 @@ function WinesTable({ wines, suppliers }: WinesTableProps) {
           aValue = a.price || 0;
           bValue = b.price || 0;
           break;
-        case "supplier":
-          const supplierA = suppliers.find((s) => s.id === a.supplier_id);
-          const supplierB = suppliers.find((s) => s.id === b.supplier_id);
+        case "producer": {
+          const producerA = companies.find((c) => c.id === a.producer_id);
+          const producerB = companies.find((c) => c.id === b.producer_id);
+          aValue = producerA?.name || "";
+          bValue = producerB?.name || "";
+          break;
+        }
+        case "supplier": {
+          const supplierA = companies.find((c) => c.id === a.supplier_id);
+          const supplierB = companies.find((c) => c.id === b.supplier_id);
           aValue = supplierA?.name || "";
           bValue = supplierB?.name || "";
           break;
+        }
         default:
           return 0;
       }
@@ -68,7 +76,7 @@ function WinesTable({ wines, suppliers }: WinesTableProps) {
     });
 
     return sorted;
-  }, [wines, suppliers, sortState]);
+  }, [wines, companies, sortState]);
 
   const handleSortChange = (columnId: string, direction: SortDirection) => {
     setSortState({ columnId, direction });
@@ -88,7 +96,7 @@ function WinesTable({ wines, suppliers }: WinesTableProps) {
             <div className="flex flex-col">
               <Link
                 href={`/dashboard/inventory/${wine.id}`}
-                className="font-semibold text-primary-foreground underline-offset-4 hover:underline"
+                className="font-semibold text-foreground underline-offset-4 hover:underline hover:text-primary"
               >
                 {wine.name}
               </Link>
@@ -115,11 +123,20 @@ function WinesTable({ wines, suppliers }: WinesTableProps) {
           render: (wine) => (wine.price ? `€${wine.price.toFixed(2)}` : "—"),
         },
         {
+          id: "producer",
+          header: "Produttore",
+          sortable: true,
+          render: (wine) => {
+            const producer = companies.find((c) => c.id === wine.producer_id);
+            return producer ? producer.name : "—";
+          },
+        },
+        {
           id: "supplier",
           header: "Fornitore",
           sortable: true,
           render: (wine) => {
-            const supplier = suppliers.find((s) => s.id === wine.supplier_id);
+            const supplier = companies.find((c) => c.id === wine.supplier_id);
             return supplier ? supplier.name : "—";
           },
         },
@@ -169,7 +186,7 @@ export default function InventoryPageContent() {
   const page = Math.max(1, Number(searchParams.get("page") ?? "1"));
   const search = searchParams.get("q") || undefined;
   const type = searchParams.get("type") || undefined;
-  const supplierId = toNumber(searchParams.get("supplier_id"));
+  const producerId = toNumber(searchParams.get("producer_id"));
   const availableOnly = searchParams.get("available_only") === "true" || searchParams.get("available_only") === "1";
   const belowThreshold = searchParams.get("below_threshold") === "true" || searchParams.get("below_threshold") === "1";
 
@@ -185,7 +202,7 @@ export default function InventoryPageContent() {
           limit: PER_PAGE,
           search: search || undefined,
           type: type && type !== "all" ? (type as WineFilters["type"]) : undefined,
-          supplier_id: supplierId,
+          producer_id: producerId,
           available_only: availableOnly || undefined,
           below_threshold: belowThreshold || undefined,
         };
@@ -210,7 +227,7 @@ export default function InventoryPageContent() {
 
     loadData();
     return () => { active = false; };
-  }, [page, search, type, supplierId, availableOnly, belowThreshold]);
+  }, [page, search, type, producerId, availableOnly, belowThreshold]);
 
   const hasNext = wines.length === PER_PAGE;
   const totalQuantity = wines.reduce((acc, wine) => acc + (wine.quantity ?? 0), 0);
@@ -232,7 +249,7 @@ export default function InventoryPageContent() {
         <div>
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Inventario · Etna</p>
           <h1 className="font-display text-2xl text-foreground sm:text-3xl">Lista vini e stock</h1>
-          <p className="text-sm text-muted-foreground">Filtra per tipologia, annata e fornitore. Dati live da FastAPI.</p>
+          <p className="text-sm text-muted-foreground">Filtra per tipologia, annata e produttore. Dati live da FastAPI.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <Badge variant="info" size="lg">
@@ -246,10 +263,10 @@ export default function InventoryPageContent() {
       </header>
 
       <InventoryFilterControls
-        suppliers={suppliers}
+        companies={suppliers}
         search={search}
         type={(type as WineFilters["type"]) ?? undefined}
-        supplierId={supplierId}
+        producerId={producerId}
         availableOnly={availableOnly}
         belowThreshold={belowThreshold}
       />
@@ -259,14 +276,14 @@ export default function InventoryPageContent() {
           <p className="text-muted-foreground">Caricamento...</p>
         </div>
       ) : (
-        <WinesTable wines={wines} suppliers={suppliers} />
+        <WinesTable wines={wines} companies={suppliers} />
       )}
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
           <h3 className="mb-4 font-display text-lg text-foreground sm:text-xl">Cards rapide</h3>
           <p className="text-sm text-muted-foreground">
-            Visualizza al volo stato e fornitore delle etichette filtrate.
+            Visualizza al volo stato e produttore delle etichette filtrate.
           </p>
           <p className="mt-2 text-xs text-muted-foreground">Nessun vino da mostrare nella vista card.</p>
         </div>

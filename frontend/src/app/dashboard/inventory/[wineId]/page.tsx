@@ -68,7 +68,7 @@ export default async function WineDetailPage({ params }: PageProps) {
         <div className="rounded-2xl border border-border bg-card/80 p-4 shadow-sm">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Prezzo medio</p>
           <div className="mt-2 text-2xl font-semibold text-foreground">€ {Number(wine.price).toFixed(2)}</div>
-          <p className="text-xs text-muted-foreground">Fornitore: {wine.supplier?.name ?? "n/d"}</p>
+          <p className="text-xs text-muted-foreground">Produttore: {wine.producer?.name ?? "n/d"}</p>
         </div>
       </section>
 
