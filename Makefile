@@ -10,7 +10,7 @@ YELLOW := \033[0;33m
 NC := \033[0m # No Color
 
 help: ## Show this help message
-	@echo "$(BLUE)test-devscaffolding - Available targets:$(NC)"
+	@echo "$(BLUE)eno_inventory - Available targets:$(NC)"
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-20s$(NC) %s\n", $$1, $$2}'
 
@@ -138,7 +138,7 @@ shell-frontend: ## Open shell in frontend container
 	docker compose -f infrastructure/docker-compose.yml --env-file .env --env-file .env exec frontend /bin/sh
 
 db-shell: ## Open PostgreSQL shell
-	docker compose -f infrastructure/docker-compose.yml --env-file .env --env-file .env exec postgres psql -U postgres -d test-devscaffolding
+	docker compose -f infrastructure/docker-compose.yml --env-file .env --env-file .env exec postgres psql -U postgres -d eno_inventory_db
 
 redis-cli: ## Open Redis CLI
 	docker compose -f infrastructure/docker-compose.yml --env-file .env --env-file .env exec redis redis-cli

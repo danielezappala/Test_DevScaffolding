@@ -1,14 +1,14 @@
 [project]
-name = "test-devscaffolding-backend"
+name = "eno_inventory-backend"
 version = "0.1.0"
-description = "Backend API for test-devscaffolding"
+description = "Backend API for eno_inventory"
 requires-python = ">=3.12"
 readme = "README.md"
 license = {text = "MIT"}
 
 [project.urls]
 Homepage = "https://test.example.com"
-Repository = "https://github.com/yourorg/test-devscaffolding"
+Repository = "https://github.com/yourorg/inventory"
 
 [tool.ruff]
 line-length = 100

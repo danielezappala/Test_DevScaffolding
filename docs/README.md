@@ -1,8 +1,8 @@
-# test-devscaffolding - Architecture Documentation
+# eno_inventory - Architecture Documentation
 
 ## Overview
 
-test-devscaffolding is a production-ready monorepo application built with modern technologies and best practices. The system consists of a FastAPI backend, Next.js frontend, PostgreSQL database with PgBouncer connection pooling, Redis for session management, and Traefik as the ingress controller with automatic HTTPS.
+eno_inventory is a production-ready monorepo application built with modern technologies and best practices. The system consists of a FastAPI backend, Next.js frontend, PostgreSQL database with PgBouncer connection pooling, Redis for session management, and Traefik as the ingress controller with automatic HTTPS.
 
 ## Architecture
 
@@ -88,7 +88,7 @@ test-devscaffolding is a production-ready monorepo application built with modern
 ## Directory Structure
 
 ```
-test-devscaffolding/
+eno_inventory/
 ├── backend/              # FastAPI backend service
 │   ├── app/             # Application code
 │   │   ├── api/         # API endpoints

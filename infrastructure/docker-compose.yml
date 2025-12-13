@@ -1,7 +1,7 @@
 services:
   traefik:
     image: traefik:v3
-    container_name: test-devscaffolding-traefik
+    container_name: eno_inventory-traefik
     restart: unless-stopped
     ports:
       - "80:80"
@@ -13,7 +13,7 @@ services:
       - ./traefik/dynamic:/etc/traefik/dynamic:ro
       - ./traefik/acme:/acme
     networks:
-      - test-devscaffolding-network
+      - eno_inventory-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.dashboard.rule=Host(`traefik.test.example.com`)"
@@ -25,7 +25,7 @@ services:
     build:
       context: ../backend
       dockerfile: Dockerfile
-    container_name: test-devscaffolding-backend
+    container_name: eno_inventory-backend
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -37,7 +37,7 @@ services:
       - GIT_COMMIT=dev
       - BUILD_DATE=2025-11-19T21:50:07.698425
       - CORS_ORIGINS=https://test.example.com,http://localhost:3000
-      - ROOT_PATH=/test-devscaffolding
+      - ROOT_PATH=/inventory
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips '*'
@@ -45,20 +45,20 @@ services:
       redis:
         condition: service_started
     networks:
-      - test-devscaffolding-network
+      - eno_inventory-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`test.example.com`) && PathPrefix(`/test-devscaffolding/api`)"
-      - "traefik.http.middlewares.strip-base-path.stripprefix.prefixes=/test-devscaffolding"
+      - "traefik.http.routers.backend.rule=Host(`test.example.com`) && PathPrefix(`/inventory/api`)"
+      - "traefik.http.middlewares.strip-base-path.stripprefix.prefixes=/inventory"
       - "traefik.http.routers.backend.middlewares=strip-base-path"
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
       - "traefik.http.services.backend.loadbalancer.server.port=8000"
-      - "traefik.http.routers.backend-metrics.rule=Host(`test.example.com`) && Path(`/test-devscaffolding/metrics`)"
+      - "traefik.http.routers.backend-metrics.rule=Host(`test.example.com`) && Path(`/inventory/metrics`)"
       - "traefik.http.routers.backend-metrics.middlewares=strip-base-path"
       - "traefik.http.routers.backend-metrics.entrypoints=websecure"
       - "traefik.http.routers.backend-metrics.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.backend-local.rule=Host(`localhost`) && PathPrefix(`/test-devscaffolding/api`)"
+      - "traefik.http.routers.backend-local.rule=Host(`localhost`) && PathPrefix(`/inventory/api`)"
       - "traefik.http.routers.backend-local.entrypoints=web"
       - "traefik.http.routers.backend-local.middlewares=strip-base-path"
 
@@ -67,29 +67,29 @@ services:
       context: ../frontend
       dockerfile: Dockerfile
       args:
-        - NEXT_PUBLIC_BASE_PATH=/test-devscaffolding
-    container_name: test-devscaffolding-frontend
+        - NEXT_PUBLIC_BASE_PATH=/inventory
+    container_name: eno_inventory-frontend
     restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_BASE_PATH=/test-devscaffolding
+      - NEXT_PUBLIC_BASE_PATH=/inventory
     depends_on:
       - backend
     networks:
-      - test-devscaffolding-network
+      - eno_inventory-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`test.example.com`) && PathPrefix(`/test-devscaffolding`)"
+      - "traefik.http.routers.frontend.rule=Host(`test.example.com`) && PathPrefix(`/inventory`)"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
-      - "traefik.http.routers.frontend-local.rule=Host(`localhost`) && PathPrefix(`/test-devscaffolding`)"
+      - "traefik.http.routers.frontend-local.rule=Host(`localhost`) && PathPrefix(`/inventory`)"
       - "traefik.http.routers.frontend-local.entrypoints=web"
 
   postgres:
     image: postgres:17-alpine
-    container_name: test-devscaffolding-postgres
+    container_name: eno_inventory-postgres
     restart: unless-stopped
     ports:
       - "5432:5432"
@@ -104,7 +104,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
-      - test-devscaffolding-network
+      - eno_inventory-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
@@ -115,7 +115,7 @@ services:
 
   pgbouncer:
     image: edoburu/pgbouncer:latest
-    container_name: test-devscaffolding-pgbouncer
+    container_name: eno_inventory-pgbouncer
     restart: unless-stopped
     environment:
       - DATABASE_URL=${POSTGRES_URL}
@@ -128,20 +128,20 @@ services:
       postgres:
         condition: service_healthy
     networks:
-      - test-devscaffolding-network
+      - eno_inventory-network
     profiles:
       - with-db
 
   redis:
     image: redis:7-alpine
-    container_name: test-devscaffolding-redis
+    container_name: eno_inventory-redis
     restart: unless-stopped
     command: redis-server /usr/local/etc/redis/redis.conf
     volumes:
       - redis_data:/data
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
     networks:
-      - test-devscaffolding-network
+      - eno_inventory-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -150,7 +150,7 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
-    container_name: test-devscaffolding-prometheus
+    container_name: eno_inventory-prometheus
     restart: unless-stopped
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
@@ -161,7 +161,7 @@ services:
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
     networks:
-      - test-devscaffolding-network
+      - eno_inventory-network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.prometheus.rule=Host(`prometheus.test.example.com`)"
@@ -172,7 +172,7 @@ services:
       - monitoring
 
 networks:
-  test-devscaffolding-network:
+  eno_inventory-network:
     driver: bridge
 
 volumes:

@@ -1,6 +1,6 @@
-# test-devscaffolding Backend
+# eno_inventory Backend
 
-FastAPI backend service for test-devscaffolding.
+FastAPI backend service for eno_inventory.
 
 ## Features
 

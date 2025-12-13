@@ -24,7 +24,7 @@ providers:
   docker:
     endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
-    network: test-devscaffolding-network
+    network: eno_inventory-network
   
   file:
     directory: /etc/traefik/dynamic

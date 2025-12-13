@@ -49,8 +49,8 @@ def create_app() -> FastAPI:
         Configured FastAPI application instance
     """
     app = FastAPI(
-        title="test-devscaffolding API",
-        description="Backend API for test-devscaffolding",
+        title="Eno Inventory API",
+        description="Backend API for Eno Inventory",
         version=settings.APP_VERSION,
         docs_url="/api/docs",
         redoc_url="/api/redoc",
@@ -85,11 +85,13 @@ def create_app() -> FastAPI:
     # Root endpoint
     @app.get("/")
     async def root():
-        return JSONResponse({
-            "message": "test-devscaffolding API",
-            "version": settings.APP_VERSION,
-            "docs": "/api/docs"
-        })
+        return JSONResponse(
+            {
+                "message": "Eno Inventory API",
+                "version": settings.APP_VERSION,
+                "docs": "/api/docs",
+            }
+        )
     
     # Health check endpoint
     @app.get("/health")

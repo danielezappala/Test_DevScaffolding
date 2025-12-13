@@ -1,6 +1,6 @@
-# test-devscaffolding
+# eno_inventory
 
-[![CI](https://github.com/YOUR_USERNAME/test-devscaffolding/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/test-devscaffolding/actions/workflows/ci.yml) [![Docker Build](https://github.com/YOUR_USERNAME/test-devscaffolding/actions/workflows/docker.yml/badge.svg)](https://github.com/YOUR_USERNAME/test-devscaffolding/actions/workflows/docker.yml) [![Security Scan](https://github.com/YOUR_USERNAME/test-devscaffolding/actions/workflows/security.yml/badge.svg)](https://github.com/YOUR_USERNAME/test-devscaffolding/actions/workflows/security.yml)
+[![CI](https://github.com/YOUR_USERNAME/inventory/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/inventory/actions/workflows/ci.yml) [![Docker Build](https://github.com/YOUR_USERNAME/inventory/actions/workflows/docker.yml/badge.svg)](https://github.com/YOUR_USERNAME/inventory/actions/workflows/docker.yml) [![Security Scan](https://github.com/YOUR_USERNAME/inventory/actions/workflows/security.yml/badge.svg)](https://github.com/YOUR_USERNAME/inventory/actions/workflows/security.yml)
 
 A production-ready monorepo application with FastAPI backend, Next.js frontend, PostgreSQL database, Redis cache, and Traefik ingress with automatic HTTPS.
 
@@ -40,7 +40,7 @@ After pushing your project to GitHub, update the badge URLs:
 
 **Example:**
 ```markdown
-[![CI](https://github.com/mycompany/test-devscaffolding/actions/workflows/ci.yml/badge.svg)](https://github.com/mycompany/test-devscaffolding/actions/workflows/ci.yml)
+[![CI](https://github.com/mycompany/inventory/actions/workflows/ci.yml/badge.svg)](https://github.com/mycompany/inventory/actions/workflows/ci.yml)
 ```
 
 ### Viewing Workflow Runs
@@ -80,7 +80,7 @@ For more information about the CI/CD pipelines, see [docs/CI_CD.md](docs/CI_CD.m
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd test-devscaffolding
+   cd eno_inventory
    ```
 
 2. **Configure environment**
@@ -101,11 +101,11 @@ For more information about the CI/CD pipelines, see [docs/CI_CD.md](docs/CI_CD.m
    ```
 
 5. **Access the application**
-- Frontend: `https://test.example.com/test-devscaffolding`
-   - Backend API: `https://test.example.com/test-devscaffolding/api/v1`
-   - API Docs: `https://test.example.com/test-devscaffolding/api/docs`
-   - Local Frontend: `http://localhost/test-devscaffolding`
-   - Local Backend API: `http://localhost/test-devscaffolding/api/v1`
+- Frontend: `https://test.example.com/inventory`
+   - Backend API: `https://test.example.com/inventory/api/v1`
+   - API Docs: `https://test.example.com/inventory/api/docs`
+   - Local Frontend: `http://localhost/inventory`
+   - Local Backend API: `http://localhost/inventory/api/v1`
 - Traefik Dashboard: `http://localhost:8080`
    - Prometheus: `http://localhost:9090`
 
@@ -190,7 +190,7 @@ Lo script verifica le porte più comuni (3000, 8000, 5432, 6379, 8080, 80, 443, 
 ## Project Structure
 
 ```
-test-devscaffolding/
+eno_inventory/
 ├── backend/              # FastAPI backend
 │   ├── app/             # Application code
 │   ├── tests/           # Backend tests
@@ -272,23 +272,23 @@ All configuration is managed through environment variables. Copy `.env.example` 
 - `APP_VERSION`: Application version (default: 0.1.0)
 - `GIT_COMMIT`: Git commit hash (default: dev)
 - `BUILD_DATE`: Build timestamp (auto-generated)
-- `BASE_PATH`: URL base path for subpath deployment (configured as: /test-devscaffolding)
+- `BASE_PATH`: URL base path for subpath deployment (configured as: /inventory)
 See `.env.example` for complete list with descriptions.
 
 ### Subpath Deployment Configuration
 
-This application is configured for **subpath deployment** at `/test-devscaffolding`. This means:
+This application is configured for **subpath deployment** at `/inventory`. This means:
 
-- The application is accessible at `https://test.example.com/test-devscaffolding` (not at the domain root)
-- All API endpoints are prefixed with `/test-devscaffolding/api`
-- Static assets are served under `/test-devscaffolding`
-- For local testing, use `http://localhost/test-devscaffolding`
+- The application is accessible at `https://test.example.com/inventory` (not at the domain root)
+- All API endpoints are prefixed with `/inventory/api`
+- Static assets are served under `/inventory`
+- For local testing, use `http://localhost/inventory`
 
 **Key Configuration Details:**
-- **Next.js basePath**: Set to `/test-devscaffolding` in `frontend/next.config.js`
-- **FastAPI root_path**: Set to `/test-devscaffolding` in `backend/app/main.py`
-- **Traefik routing**: Configured with `PathPrefix(/test-devscaffolding)` rules
-- **Environment variable**: `NEXT_PUBLIC_BASE_PATH=/test-devscaffolding`
+- **Next.js basePath**: Set to `/inventory` in `frontend/next.config.js`
+- **FastAPI root_path**: Set to `/inventory` in `backend/app/main.py`
+- **Traefik routing**: Configured with `PathPrefix(/inventory)` rules
+- **Environment variable**: `NEXT_PUBLIC_BASE_PATH=/inventory`
 
 ## API Documentation
 
@@ -343,7 +343,7 @@ npm run test:coverage
 2. **Deploy application**
    ```bash
    git clone <repository-url>
-   cd test-devscaffolding
+   cd eno_inventory
    cp .env.example .env
    # Edit .env with production values
    make init
@@ -365,7 +365,7 @@ npm run test:coverage
 
 **Restore Database:**
 ```bash
-docker compose exec -T postgres psql -U postgres test-devscaffolding < backup.sql
+docker compose exec -T postgres psql -U postgres eno_inventory < backup.sql
 ```
 
 ## Monitoring
@@ -397,9 +397,9 @@ docker compose logs --tail=100 backend
 
 ```bash
 # Backend health
-curl https://test.example.com/test-devscaffolding/api/v1/health
+curl https://test.example.com/inventory/api/v1/health
 # Backend version
-curl https://test.example.com/test-devscaffolding/api/v1/version
+curl https://test.example.com/inventory/api/v1/version
 # Check service status
 docker compose ps
 ```
@@ -490,19 +490,19 @@ open http://localhost:9090
 
 ```bash
 # Verify Traefik routing rules
-docker compose logs traefik | grep "/test-devscaffolding"
+docker compose logs traefik | grep "/inventory"
 
 # Check that services are registered with Traefik
 curl http://localhost:8080/api/http/routers
 
 # Test localhost routing
-curl -I http://localhost/test-devscaffolding
+curl -I http://localhost/inventory
 ```
 
 **Solution:**
-- Ensure you're accessing the correct URL: `https://test.example.com/test-devscaffolding` (not `https://test.example.com`)
-- For local testing, use: `http://localhost/test-devscaffolding`
-- Verify Traefik labels in `infrastructure/docker-compose.yml` include `PathPrefix(/test-devscaffolding)`
+- Ensure you're accessing the correct URL: `https://test.example.com/inventory` (not `https://test.example.com`)
+- For local testing, use: `http://localhost/inventory`
+- Verify Traefik labels in `infrastructure/docker-compose.yml` include `PathPrefix(/inventory)`
 
 **Problem: Static assets (JS, CSS, images) fail to load**
 
@@ -524,8 +524,8 @@ docker compose up -d --build frontend
 ```
 
 **Expected configuration:**
-- `frontend/next.config.js` should have: `basePath: '/test-devscaffolding'`
-- `NEXT_PUBLIC_BASE_PATH` environment variable should be: `/test-devscaffolding`
+- `frontend/next.config.js` should have: `basePath: '/inventory'`
+- `NEXT_PUBLIC_BASE_PATH` environment variable should be: `/inventory`
 
 **Problem: API calls return 404 or CORS errors**
 
@@ -543,28 +543,28 @@ docker compose exec frontend env | grep NEXT_PUBLIC_API_URL
 docker compose logs traefik | grep backend
 
 # Test API endpoint directly
-curl http://localhost/test-devscaffolding/api/v1/health
+curl http://localhost/inventory/api/v1/health
 ```
 
 **Expected configuration:**
-- `NEXT_PUBLIC_API_URL` should be: `https://test.example.com/test-devscaffolding/api`
-- Backend Traefik rule should include: `PathPrefix(/test-devscaffolding/api)`
+- `NEXT_PUBLIC_API_URL` should be: `https://test.example.com/inventory/api`
+- Backend Traefik rule should include: `PathPrefix(/inventory/api)`
 
 **Problem: OpenAPI docs not accessible**
 
 **Solution:**
 ```bash
 # Access docs at the correct path
-open https://test.example.com/test-devscaffolding/api/docs
+open https://test.example.com/inventory/api/docs
 
 # Or for local testing
-open http://localhost/test-devscaffolding/api/docs
+open http://localhost/inventory/api/docs
 
 # Verify FastAPI root_path is set
 docker compose exec backend python -c "from app.main import app; print(app.root_path)"
 ```
 
-**Expected output:** `/test-devscaffolding`
+**Expected output:** `/inventory`
 
 **Problem: Internal navigation (Link components) doesn't work**
 
@@ -585,16 +585,16 @@ docker compose exec backend python -c "from app.main import app; print(app.root_
 docker compose ps
 
 # 2. Test frontend (should return HTML)
-curl -I http://localhost/test-devscaffolding
+curl -I http://localhost/inventory
 
 # 3. Test backend API (should return JSON)
-curl http://localhost/test-devscaffolding/api/v1/health
+curl http://localhost/inventory/api/v1/health
 
 # 4. Test static assets (should return JavaScript)
-curl -I http://localhost/test-devscaffolding/_next/static/
+curl -I http://localhost/inventory/_next/static/
 
 # 5. Check Traefik routing
-curl http://localhost:8080/api/http/routers | jq '.[] | select(.name | contains("test-devscaffolding"))'
+curl http://localhost:8080/api/http/routers | jq '.[] | select(.name | contains("eno_inventory"))'
 ```
 
 **All tests should return 200 OK status codes.**

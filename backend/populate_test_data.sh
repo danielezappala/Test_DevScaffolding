@@ -1,7 +1,7 @@
 #!/bin/bash
 # Popola database con dati di test per API Inventario Vini
 
-API_URL="http://localhost/test-devscaffolding/api/v1/inventory"
+API_URL="http://localhost/inventory/api/v1/inventory"
 
 echo "🌱 Popolamento database di test..."
 echo ""
@@ -199,6 +199,6 @@ echo ""
 echo "✅ Pronto per i test!"
 echo ""
 echo "💡 Suggerimenti:"
-echo "  - Apri Swagger UI: http://localhost/test-devscaffolding/api/docs"
-echo "  - Vedi stock critici: curl http://localhost/test-devscaffolding/api/v1/inventory/critical | jq"
-echo "  - Lista vini: curl http://localhost/test-devscaffolding/api/v1/inventory/wines | jq"
+echo "  - Apri Swagger UI: http://localhost/inventory/api/docs"
+echo "  - Vedi stock critici: curl http://localhost/inventory/api/v1/inventory/critical | jq"
+echo "  - Lista vini: curl http://localhost/inventory/api/v1/inventory/wines | jq"

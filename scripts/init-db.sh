@@ -8,7 +8,7 @@ YELLOW='\033[0;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}Initializing database for test-devscaffolding...${NC}"
+echo -e "${BLUE}Initializing database for eno_inventory...${NC}"
 
 # Check if .env file exists
 if [ ! -f .env ]; then
@@ -50,10 +50,10 @@ fi
 
 # Create database if it doesn't exist
 echo -e "${BLUE}Ensuring database exists...${NC}"
-docker compose exec -T postgres psql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'test-devscaffolding'" | grep -q 1 || \
-    docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE test-devscaffolding"
+docker compose exec -T postgres psql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'eno_inventory_db'" | grep -q 1 || \
+    docker compose exec -T postgres psql -U postgres -c "CREATE DATABASE eno_inventory_db"
 
-echo -e "${GREEN}Database 'test-devscaffolding' is ready!${NC}"
+echo -e "${GREEN}Database 'eno_inventory_db' is ready!${NC}"
 
 # Run migrations
 echo -e "${BLUE}Running database migrations...${NC}"

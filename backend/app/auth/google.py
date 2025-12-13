@@ -30,7 +30,7 @@ async def login_via_google(request: Request) -> RedirectResponse:
     
     redirect_uri = request.url_for('auth_callback')
     
-    if "test-devscaffolding" not in str(redirect_uri):
+    if "eno_inventory" not in str(redirect_uri):
         pass
         
     if "https" in settings.CORS_ORIGINS[0] and "localhost" not in str(redirect_uri) and "127.0.0.1" not in str(redirect_uri):

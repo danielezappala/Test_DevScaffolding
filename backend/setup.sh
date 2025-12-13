@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Setting up Python virtual environment for test-devscaffolding backend..."
+echo "Setting up Python virtual environment for eno_inventory backend..."
 
 # Check Python version
 if ! command -v python3 &> /dev/null; then

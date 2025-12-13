@@ -4,8 +4,8 @@
 
 set -euo pipefail
 
-DB_NAME="test-devscaffolding_db"
-DB_USER="test-devscaffolding_user"
+DB_NAME="eno_inventory_db"
+DB_USER="eno_inventory_user"
 DB_PASSWORD="2Mj1NJXxlERRfn7ue8HNcLZ-OGPXB-sV"
 
 echo "🔧 Creazione database e utente su PostgreSQL esterno..."

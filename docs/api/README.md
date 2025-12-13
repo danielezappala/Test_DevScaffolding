@@ -2,7 +2,7 @@
 
 ## Overview
 
-The test-devscaffolding backend provides a RESTful API built with FastAPI. All API endpoints are namespaced under `/api/v1/` and return JSON responses.
+The eno_inventory backend provides a RESTful API built with FastAPI. All API endpoints are namespaced under `/api/v1/` and return JSON responses.
 
 ## Base URL
 

@@ -1,6 +1,6 @@
-# Contributing to test-devscaffolding
+# Contributing to eno_inventory
 
-Thank you for your interest in contributing to test-devscaffolding! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to eno_inventory! This document provides guidelines and instructions for contributing to the project.
 
 ## Table of Contents
 
@@ -27,7 +27,7 @@ Thank you for your interest in contributing to test-devscaffolding! This documen
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd test-devscaffolding
+cd eno_inventory
 
 # Initialize project
 make init
@@ -505,4 +505,4 @@ We follow [Semantic Versioning](https://semver.org/):
 - Focus on the code, not the person
 - Help others learn and grow
 
-Thank you for contributing to test-devscaffolding!
+Thank you for contributing to eno_inventory!

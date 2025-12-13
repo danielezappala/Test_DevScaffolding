@@ -1,1 +1,1 @@
-"""Test suite for test-devscaffolding backend"""
+"""Test suite for eno_inventory backend"""

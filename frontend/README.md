@@ -1,4 +1,4 @@
-# test-devscaffolding Frontend
+# eno_inventory Frontend
 
 Next.js frontend application with TypeScript, Tailwind CSS, and shadcn/ui.
 
@@ -52,8 +52,8 @@ The application will be available at http://localhost:3000
 Build and run with Docker:
 
 ```bash
-docker build -t test-devscaffolding-frontend .
-docker run -p 3000:3000 -e NEXT_PUBLIC_API_URL=http://backend:8000 test-devscaffolding-frontend
+docker build -t eno_inventory-frontend .
+docker run -p 3000:3000 -e NEXT_PUBLIC_API_URL=http://backend:8000 eno_inventory-frontend
 ```
 
 ## Project Structure

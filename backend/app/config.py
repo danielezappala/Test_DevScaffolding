@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     
     # Database configuration
     DATABASE_URL: str = Field(
-        default="postgresql+asyncpg://test-devscaffolding:8HoPI12Zxw_IolNCtC30mcdBaqidheIc@pgbouncer:6432/test-devscaffolding",
+        default="postgresql+asyncpg://eno_inventory_user:8HoPI12Zxw_IolNCtC30mcdBaqidheIc@pgbouncer:6432/eno_inventory_db",
         description="PostgreSQL connection URL via PgBouncer"
     )
     

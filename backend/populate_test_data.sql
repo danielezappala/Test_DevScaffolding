@@ -1,5 +1,5 @@
 -- Popola database con dati di test per API Inventario Vini
--- Esegui con: psql -U postgres -h localhost -p 5432 -d test-devscaffolding_db -f populate_test_data.sql
+-- Esegui con: psql -U postgres -h localhost -p 5432 -d eno_inventory_db -f populate_test_data.sql
 
 BEGIN;
 
