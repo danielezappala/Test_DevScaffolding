@@ -84,10 +84,12 @@ export function BarcodeScanner({
     setActiveMode("manual");
   };
 
+  const showModeToggle = mode !== "manual" && deviceType !== "desktop";
+
   return (
     <div className={cn("barcode-scanner", className)}>
-      {/* Mode toggle for mobile/tablet */}
-      {mode !== "manual" && (
+      {/* Mode toggle only for mobile/tablet */}
+      {showModeToggle && (
         <div className="mb-4 flex gap-2">
           <button
             type="button"

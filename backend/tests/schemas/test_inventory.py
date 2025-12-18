@@ -1,16 +1,20 @@
 """Tests for Pydantic schemas"""
 
-import pytest
 from datetime import date, datetime
 from decimal import Decimal
+
+import pytest
 from pydantic import ValidationError
 
 from app.schemas.inventory import (
-    WineCreate, WineUpdate, WineRead,
-    SupplierCreate, SupplierUpdate, SupplierRead,
-    LotCreate, LotUpdate,
+    LotCreate,
+    MovementType,
     StockMovementCreate,
-    WineType, MovementType
+    SupplierCreate,
+    SupplierUpdate,
+    WineCreate,
+    WineType,
+    WineUpdate,
 )
 
 

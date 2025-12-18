@@ -22,6 +22,7 @@ services:
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
 
   backend:
+    image: ghcr.io/danielezappala/eno-inventory-backend:latest
     build:
       context: ../backend
       dockerfile: Dockerfile
@@ -36,7 +37,7 @@ services:
       - APP_VERSION=0.1.0
       - GIT_COMMIT=dev
       - BUILD_DATE=2025-11-19T21:50:07.698425
-      - CORS_ORIGINS=https://test.example.com,http://localhost:3000
+      - CORS_ORIGINS=http://localhost:3000
       - ROOT_PATH=/inventory
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
@@ -63,8 +64,9 @@ services:
       - "traefik.http.routers.backend-local.middlewares=strip-base-path"
 
   frontend:
+    image: ghcr.io/danielezappala/eno-inventory-backend:latest
     build:
-      context: ../frontend
+      context: ../backend
       dockerfile: Dockerfile
       args:
         - NEXT_PUBLIC_BASE_PATH=/inventory

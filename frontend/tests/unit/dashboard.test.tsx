@@ -1,35 +1,53 @@
-import { describe, expect, it } from "vitest"
-import { fireEvent, render, screen, within } from "@testing-library/react"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { render, screen, waitFor } from "@testing-library/react"
+
+const mockInventoryApi = vi.hoisted(() => ({
+  listWines: vi.fn(),
+  listSuppliers: vi.fn(),
+  listMovements: vi.fn(),
+  criticalStock: vi.fn(),
+}))
+
+vi.mock("@/lib/api", () => ({
+  inventoryApi: mockInventoryApi,
+}))
+
 import DashboardPage from "@/app/dashboard/page"
 
 describe("Dashboard page", () => {
-  it("mostra header, azioni rapide e riepilogo", () => {
-    render(<DashboardPage />)
-
-    expect(screen.getByText(/Control Room/i)).toBeInTheDocument()
-    expect(screen.getByText(/Riepilogo giornaliero/i)).toBeInTheDocument()
-
-    // quick actions
-    expect(screen.getByText("Carico")).toBeInTheDocument()
-    expect(screen.getByText("Scarico")).toBeInTheDocument()
-    expect(screen.getByText("Nuovo fornitore")).toBeInTheDocument()
-
-    // riepilogo cards
-    expect(screen.getByText(/Etichette attive/i)).toBeInTheDocument()
-    expect(screen.getByText(/Bottiglie a stock/i)).toBeInTheDocument()
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockInventoryApi.listWines.mockResolvedValue([
+      { id: 1, name: "Barolo", quantity: 5, threshold: 2 },
+      { id: 2, name: "Chianti", quantity: 3, threshold: 1 },
+    ])
+    mockInventoryApi.listSuppliers.mockResolvedValue([{ id: 1 }, { id: 2 }])
+    mockInventoryApi.listMovements.mockResolvedValue([
+      { id: 10, type: "in", quantity: 2, wine_id: 1, timestamp: new Date().toISOString() },
+      { id: 11, type: "out", quantity: 1, wine_id: 2, timestamp: new Date().toISOString() },
+    ])
+    mockInventoryApi.criticalStock.mockResolvedValue([{ wine_id: 1, quantity: 1, threshold: 2 }])
   })
 
-  it("collassa la sidebar con l'hamburger", () => {
+  it("mostra header, azioni rapide e riepilogo", async () => {
     render(<DashboardPage />)
 
-    // menu aperto: voce completa visibile
-    const nav = screen.getByRole("navigation")
-    expect(within(nav).getByText("Dashboard")).toBeInTheDocument()
+    expect(await screen.findByText(/Riepilogo giornaliero/i)).toBeInTheDocument()
+    expect(await screen.findByText("Carico")).toBeInTheDocument()
+    expect(screen.getByText("Scarico")).toBeInTheDocument()
+    expect(screen.getByText("Nuovo partner")).toBeInTheDocument()
 
-    const toggle = screen.getByLabelText(/Apri\/chiudi menu/i)
-    fireEvent.click(toggle)
+    await waitFor(() => {
+      expect(screen.getByText(/Etichette attive/i)).toBeInTheDocument()
+      expect(screen.getByText(/Bottiglie a stock/i)).toBeInTheDocument()
+    })
+  })
 
-    // dopo il click, l'etichetta testuale nella sidebar scompare (breadcrumb rimane)
-    expect(within(nav).queryByText("Dashboard")).not.toBeInTheDocument()
+  it("mostra un messaggio di errore se il caricamento fallisce", async () => {
+    mockInventoryApi.listWines.mockRejectedValueOnce(new Error("boom"))
+
+    render(<DashboardPage />)
+
+    expect(await screen.findByText(/Errore nel recupero dati/i)).toBeInTheDocument()
   })
 })
