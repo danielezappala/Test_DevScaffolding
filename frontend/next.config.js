@@ -1,10 +1,17 @@
 /** @type {import('next').NextConfig} */
 // Force build cache invalidation: 2025-11-26-debug-1
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+const isDev = process.env.NODE_ENV !== 'production';
+const basePath =
+  process.env.NEXT_PUBLIC_BASE_PATH !== undefined
+    ? process.env.NEXT_PUBLIC_BASE_PATH
+    : isDev
+      ? ''
+      : '/inventory';
+const assetPrefix = process.env.NEXT_PUBLIC_ASSET_PREFIX || basePath || undefined;
 
 const nextConfig = {
   basePath,
-  assetPrefix: basePath,
+  assetPrefix,
   output: 'standalone',
   trailingSlash: false,
   reactStrictMode: true,
