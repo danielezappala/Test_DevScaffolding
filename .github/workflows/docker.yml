@@ -66,6 +66,7 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+          platforms: linux/amd64,linux/arm64 
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=backend
@@ -141,6 +142,7 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' }}
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=frontend
