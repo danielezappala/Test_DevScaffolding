@@ -66,29 +66,35 @@ services:
   frontend:
     image: ghcr.io/danielezappala/eno-inventory-backend:latest
     build:
-      context: ../backend
+      context: ../frontend
       dockerfile: Dockerfile
       args:
-        - NEXT_PUBLIC_BASE_PATH=/inventory
+        NEXT_PUBLIC_BASE_PATH: /inventory
+        NEXT_PUBLIC_API_URL: /inventory/api/v1
+    environment:
+      NEXT_PUBLIC_BASE_PATH: /inventory
+      NEXT_PUBLIC_API_URL: /inventory/api/v1
     container_name: eno_inventory-frontend
     restart: unless-stopped
     ports:
       - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_BASE_PATH=/inventory
     depends_on:
       - backend
     networks:
       - eno_inventory-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`test.example.com`) && PathPrefix(`/inventory`)"
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`) && PathPrefix(`/inventory`)"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.inventory-redirect.redirectregex.regex=^/inventory/?$"
+      - "traefik.http.middlewares.inventory-redirect.redirectregex.replacement=/inventory/dashboard"
+      - "traefik.http.routers.frontend.middlewares=inventory-redirect"
+      - "traefik.http.routers.frontend-assets.rule=Host(`${DOMAIN}`) && PathPrefix(`/inventory/_next`)"
+      - "traefik.http.routers.frontend-assets.entrypoints=websecure"
+      - "traefik.http.routers.frontend-assets.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.frontend-assets.service=frontend"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
-      - "traefik.http.routers.frontend-local.rule=Host(`localhost`) && PathPrefix(`/inventory`)"
-      - "traefik.http.routers.frontend-local.entrypoints=web"
-
   postgres:
     image: postgres:17-alpine
     container_name: eno_inventory-postgres
