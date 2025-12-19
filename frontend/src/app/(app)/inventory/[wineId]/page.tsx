@@ -40,13 +40,13 @@ export default async function WineDetailPage({ params }: PageProps) {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <Link
-            href={`/dashboard/inventory/${wine.id}/edit`}
+            href={`/inventory/${wine.id}/edit`}
             className="inline-flex items-center gap-2 rounded-full border border-primary/70 bg-primary/15 px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:border-primary hover:bg-primary/25"
           >
             Modifica
           </Link>
           <Link
-            href={`/dashboard/movements/new?wine_id=${wine.id}`}
+            href={`/movements/new?wine_id=${wine.id}`}
             className="inline-flex items-center gap-2 rounded-full border border-accent/70 bg-accent/20 px-4 py-2 text-sm font-semibold text-accent-foreground transition hover:border-accent hover:bg-accent/30"
           >
             Nuovo movimento
@@ -82,7 +82,7 @@ export default async function WineDetailPage({ params }: PageProps) {
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-2xl text-foreground">Ultimi movimenti</h2>
-      <Link href="/dashboard/movements" className="text-sm font-semibold text-primary-foreground underline-offset-4 hover:underline">
+      <Link href="/movements" className="text-sm font-semibold text-primary-foreground underline-offset-4 hover:underline">
             Vedi tutti
           </Link>
         </div>

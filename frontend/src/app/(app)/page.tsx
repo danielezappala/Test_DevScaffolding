@@ -7,9 +7,9 @@ import { inventoryApi } from "@/lib/api";
 import type { StockMovement, Wine, WineCriticalStock } from "@/types";
 
 const quickActions = [
-  { label: "Carico", desc: "Registra ingresso stock", tone: "primary", href: "/dashboard/movements/new?type=in" },
-  { label: "Scarico", desc: "Registra uscita stock", tone: "accent", href: "/dashboard/movements/new?type=out" },
-  { label: "Nuovo partner", desc: "Aggiungi produttore/distributore", tone: "muted", href: "/dashboard/suppliers/new" },
+  { label: "Carico", desc: "Registra ingresso stock", tone: "primary", href: "/movements/new?type=in" },
+  { label: "Scarico", desc: "Registra uscita stock", tone: "accent", href: "/movements/new?type=out" },
+  { label: "Nuovo partner", desc: "Aggiungi produttore/distributore", tone: "muted", href: "/suppliers/new" },
 ];
 
 export default function DashboardPage() {
@@ -74,28 +74,28 @@ export default function DashboardPage() {
         value: loading ? "…" : wines.length.toString(),
         delta: `${critical.length} stock critici`,
         color: "teal",
-        href: "/dashboard/inventory",
+        href: "/inventory",
       },
       {
         title: "Bottiglie a stock",
         value: loading ? "…" : totalBottles.toLocaleString("it-IT"),
         delta: `${movementBreakdown.in} carichi recenti`,
         color: "teal",
-        href: "/dashboard/inventory",
+        href: "/inventory",
       },
       {
         title: "Movimenti recenti",
         value: loading ? "…" : movements.length.toString(),
         delta: `${movementBreakdown.in} carichi · ${movementBreakdown.out} scarichi`,
         color: "sage",
-        href: "/dashboard/movements",
+        href: "/movements",
       },
       {
         title: "Fornitori",
         value: loading ? "…" : suppliersCount.toString(),
         delta: `${critical.length} critici`,
         color: "taupe",
-        href: "/dashboard/suppliers",
+        href: "/suppliers",
       },
     ],
     [loading, wines.length, totalBottles, movementBreakdown, suppliersCount, critical.length, movements.length]
@@ -141,7 +141,7 @@ export default function DashboardPage() {
                 <h2 className="font-display text-xl font-bold text-foreground">Carichi &amp; scarichi</h2>
               </div>
               <Link
-                href="/dashboard/movements"
+                href="/movements"
                 className="text-sm font-semibold text-earth-teal underline-offset-4 hover:underline"
               >
                 Vai ai movimenti
@@ -189,7 +189,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <h3 className="font-display text-lg text-foreground">Stock critici</h3>
                 <Link
-                  href="/dashboard/critical"
+                  href="/critical"
                   className="text-xs font-semibold text-earth-brick underline-offset-4 hover:underline"
                 >
                   Vedi tutti
@@ -202,7 +202,7 @@ export default function DashboardPage() {
                     className="flex items-center justify-between rounded-lg border border-earth-brick/30 bg-earth-brick/20 px-3 py-2 text-sm"
                   >
                     <Link
-                      href={`/dashboard/inventory/${row.id}`}
+                      href={`/inventory/${row.id}`}
                       className="flex items-center gap-2 font-medium text-foreground underline-offset-4 hover:underline"
                     >
                       <span
@@ -238,7 +238,7 @@ export default function DashboardPage() {
                       <span className="text-xs text-foreground/70">Qty: {wine.quantity} btg</span>
                     </div>
                     <Link
-                      href={`/dashboard/inventory/${wine.id}`}
+                      href={`/inventory/${wine.id}`}
                       className="rounded-full border border-earth-teal/70 bg-earth-teal/30 px-4 py-1.5 text-xs font-semibold text-foreground transition hover:border-earth-teal hover:bg-earth-teal/40"
                     >
                       Scheda

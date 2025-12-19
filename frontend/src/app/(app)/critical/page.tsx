@@ -47,14 +47,14 @@ export default async function CriticalStockPage({ searchParams }: { searchParams
             <p className="mt-3 text-sm text-muted-foreground">Fornitore: {wine.supplier?.name ?? "n/d"}</p>
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <Button
-                href={`/dashboard/inventory/${wine.id}`}
+                href={`/inventory/${wine.id}`}
                 variant="secondary"
                 size="sm"
               >
                 Apri scheda
               </Button>
               <Button
-                href="/dashboard/movements/new"
+                href="/movements/new"
                 variant="outline"
                 size="sm"
               >

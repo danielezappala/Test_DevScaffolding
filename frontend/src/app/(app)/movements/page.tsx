@@ -46,7 +46,7 @@ export default async function MovementsPage({ searchParams }: { searchParams?: S
           <h1 className="font-display text-2xl text-foreground sm:text-3xl">Storico carichi/scarichi</h1>
           <p className="text-sm text-muted-foreground">Consulta i movimenti provenienti dall&apos;API inventory.</p>
         </div>
-        <Button href="/dashboard/movements/new" variant="primary">
+        <Button href="/movements/new" variant="primary">
           <Plus className="h-5 w-5" />
           Nuovo movimento
         </Button>

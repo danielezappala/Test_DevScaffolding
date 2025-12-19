@@ -95,7 +95,7 @@ function WinesTable({ wines, companies }: WinesTableProps) {
           render: (wine) => (
             <div className="flex flex-col">
               <Link
-                href={`/dashboard/inventory/${wine.id}`}
+                href={`/inventory/${wine.id}`}
                 className="font-semibold text-foreground underline-offset-4 hover:underline hover:text-primary"
               >
                 {wine.name}
@@ -146,14 +146,14 @@ function WinesTable({ wines, companies }: WinesTableProps) {
           render: (wine) => (
             <div className="flex items-center gap-2">
               <Button
-                href={`/dashboard/inventory/${wine.id}`}
+                href={`/inventory/${wine.id}`}
                 variant="ghost"
                 size="sm"
               >
                 Dettagli
               </Button>
               <Button
-                href={`/dashboard/inventory/${wine.id}/edit`}
+                href={`/inventory/${wine.id}/edit`}
                 variant="outline"
                 size="sm"
               >
@@ -255,7 +255,7 @@ export default function InventoryPageContent() {
           <Badge variant="info" size="lg">
             {loading ? "..." : `${wines.length} etichette · ${totalQuantity} bottiglie`}
           </Badge>
-          <Button href="/dashboard/inventory/new" variant="primary">
+          <Button href="/inventory/new" variant="primary">
             <Plus className="h-5 w-5" />
             Nuovo vino
           </Button>

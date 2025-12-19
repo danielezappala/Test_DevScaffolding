@@ -14,7 +14,7 @@ export default async function SuppliersPage() {
           <h1 className="font-display text-2xl text-foreground sm:text-3xl">Anagrafica partner</h1>
           <p className="text-sm text-muted-foreground">Gestisci cantine, distributori e contatti di riferimento.</p>
         </div>
-        <Button href="/dashboard/suppliers/new" variant="primary">
+        <Button href="/suppliers/new" variant="primary">
           <Plus className="h-5 w-5" />
           Nuovo partner
         </Button>

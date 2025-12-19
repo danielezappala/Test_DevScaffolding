@@ -96,7 +96,7 @@ export function SuppliersTable({ suppliers }: SuppliersTableProps) {
           render: (supplier) => (
             <div className="flex items-center gap-2">
               <Button
-                href={`/dashboard/suppliers/${supplier.id}/edit`}
+                href={`/suppliers/${supplier.id}/edit`}
                 variant="outline"
                 size="sm"
               >

@@ -7,12 +7,12 @@ import { LayoutDashboard, Package, TrendingUp, Users, AlertTriangle, Scan } from
 import { cn } from "@/lib/utils";
 
 const navItems = [
-    { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, color: "taupe-dark" },
-    { label: "Quick Scan", href: "/dashboard/quick-scan", icon: Scan, color: "teal" },
-    { label: "Inventario", href: "/dashboard/inventory", icon: Package, color: "teal" },
-    { label: "Movimenti", href: "/dashboard/movements", icon: TrendingUp, color: "sage" },
-    { label: "Fornitori", href: "/dashboard/suppliers", icon: Users, color: "taupe" },
-    { label: "Stock critici", href: "/dashboard/critical", icon: AlertTriangle, color: "brick" },
+    { label: "Dashboard", href: "/", icon: LayoutDashboard, color: "taupe-dark" },
+    { label: "Quick Scan", href: "/quick-scan", icon: Scan, color: "teal" },
+    { label: "Inventario", href: "/inventory", icon: Package, color: "teal" },
+    { label: "Movimenti", href: "/movements", icon: TrendingUp, color: "sage" },
+    { label: "Fornitori", href: "/suppliers", icon: Users, color: "taupe" },
+    { label: "Stock critici", href: "/critical", icon: AlertTriangle, color: "brick" },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -60,7 +60,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 <div className="px-3 py-2 text-xs text-muted-foreground">dev@example.com</div>
                                 <hr className="my-2 border-border" />
                                 <Link
-                                    href="/dashboard/settings"
+                                    href="/settings"
                                     className="block rounded-lg px-3 py-2 text-sm font-medium text-foreground transition hover:bg-primary/10"
                                 >
                                     Impostazioni
@@ -93,7 +93,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <div className="mb-6 ml-1 text-xs uppercase tracking-wide text-muted-foreground">Navigazione</div>
                     <nav className="flex flex-col gap-2">
                         {navItems.map((item) => {
-                            const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname?.startsWith(item.href));
+                            const isActive = pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href));
                             const Icon = item.icon;
                             return (
                                 <Link

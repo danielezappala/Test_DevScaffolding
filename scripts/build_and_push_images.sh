@@ -23,8 +23,8 @@ build_and_push() {
   local service="$1"
   local context="$2"
   local tag="$REGISTRY/eno-inventory-${service}:${VERSION}"
-  local tags=(-t "$tag")
-  local build_args=()
+  local -a tags=(-t "$tag")
+  local -a build_args=()
 
   if [[ "$VERSION" != "latest" ]]; then
     tags+=(-t "$REGISTRY/eno-inventory-${service}:latest")
@@ -39,10 +39,10 @@ build_and_push() {
   fi
 
   echo "🚢 Building ${service} for ${PLATFORMS} → ${tag}"
-    docker buildx build \
-      --platform "$PLATFORMS" \
-      "${tags[@]}" \
-      "${build_args[@]}" \
+  docker buildx build \
+    --platform "$PLATFORMS" \
+    "${tags[@]}" \
+    ${build_args[@]+"${build_args[@]}"} \
       --no-cache \
       --push \
       "$context"

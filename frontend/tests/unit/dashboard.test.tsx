@@ -12,7 +12,7 @@ vi.mock("@/lib/api", () => ({
   inventoryApi: mockInventoryApi,
 }))
 
-import DashboardPage from "@/app/dashboard/page"
+import DashboardPage from "@/app/(app)/page"
 
 describe("Dashboard page", () => {
   beforeEach(() => {

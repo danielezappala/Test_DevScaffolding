@@ -7,7 +7,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import * as fc from "fast-check";
-import QuickScanPage from "@/app/dashboard/quick-scan/page";
+import QuickScanPage from "@/app/(app)/quick-scan/page";
 
 // Mock the API client
 vi.mock("@/lib/api", () => ({

@@ -1,27 +1,33 @@
-import { describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { render, screen } from "@testing-library/react"
 
-const redirectMock = vi.fn()
-
-vi.mock("next/navigation", () => ({
-  redirect: (...args: Parameters<typeof redirectMock>) => redirectMock(...args),
+const mockInventoryApi = vi.hoisted(() => ({
+  listWines: vi.fn(),
+  listSuppliers: vi.fn(),
+  listMovements: vi.fn(),
+  criticalStock: vi.fn(),
 }))
 
-import Home from "@/app/page"
+vi.mock("@/lib/api", () => ({
+  inventoryApi: mockInventoryApi,
+}))
+
+import Home from "@/app/(app)/page"
 
 describe("Home page", () => {
   beforeEach(() => {
-    redirectMock.mockClear()
+    vi.clearAllMocks()
+    mockInventoryApi.listWines.mockResolvedValue([])
+    mockInventoryApi.listSuppliers.mockResolvedValue([])
+    mockInventoryApi.listMovements.mockResolvedValue([])
+    mockInventoryApi.criticalStock.mockResolvedValue([])
   })
 
-  it("redirects authenticated users to the dashboard", async () => {
-    await Home()
+  it("renders the dashboard summary at the root route", async () => {
+    render(<Home />)
 
-    expect(redirectMock).toHaveBeenCalledWith("/dashboard")
-  })
-
-  it("returns null after triggering the redirect", async () => {
-    const result = await Home()
-
-    expect(result).toBeNull()
+    expect(await screen.findByText(/Riepilogo giornaliero/i)).toBeInTheDocument()
+    expect(screen.getByText("Carico")).toBeInTheDocument()
+    expect(screen.getByText("Scarico")).toBeInTheDocument()
   })
 })
