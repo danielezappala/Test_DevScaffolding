@@ -64,7 +64,7 @@ services:
       - "traefik.http.routers.backend-local.middlewares=strip-base-path"
 
   frontend:
-    image: ghcr.io/danielezappala/eno-inventory-backend:latest
+    image: ghcr.io/danielezappala/eno-inventory-frontend:latest
     build:
       context: ../frontend
       dockerfile: Dockerfile
