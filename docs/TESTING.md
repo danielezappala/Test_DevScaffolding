@@ -6,24 +6,24 @@ Questa directory contiene le guide per testare le API del sistema di gestione in
 
 ### Guide Principali
 
-1. **[TESTING_GUIDE.md](./backend/TESTING_GUIDE.md)** 📖
+1. **[TESTING_GUIDE.md](../backend/TESTING_GUIDE.md)** 📖
    - Guida completa per testare le API
    - Comandi curl per tutti gli endpoint
    - Esempi di scenari reali
    - Tips & tricks per debugging
 
-2. **[QUICK_TEST.md](./backend/QUICK_TEST.md)** ⚡
+2. **[QUICK_TEST.md](../backend/QUICK_TEST.md)** ⚡
    - Quick reference con comandi più usati
    - Perfetto per test rapidi
 
 ### Script Utility
 
-3. **[populate_test_data.sh](./backend/populate_test_data.sh)** 🌱
+3. **[populate_test_data.sh](../backend/populate_test_data.sh)** 🌱
    - Script per popolare il database con dati di test
    - Crea fornitori, vini e movimenti di esempio
    - Eseguibile: `./backend/populate_test_data.sh`
 
-4. **[curl-format.txt](./backend/curl-format.txt)** ⏱️
+4. **[curl-format.txt](../backend/curl-format.txt)** ⏱️
    - Template per misurare performance delle API
    - Uso: `curl -w "@backend/curl-format.txt" -o /dev/null -s URL`
 
@@ -38,6 +38,9 @@ uvicorn app.main:app --reload
 ```
 
 Poi apri nel browser: **http://localhost:8000/api/docs**
+
+Se stai usando Traefik con subpath:
+- **https://test.example.com/inventory/api/docs**
 
 ### Opzione 2: curl (Per Utenti Avanzati)
 
@@ -66,13 +69,16 @@ curl http://localhost:8000/api/v1/inventory/wines | jq
 
 ## 📖 Documentazione Completa
 
-Per la guida completa, apri: **[backend/TESTING_GUIDE.md](./backend/TESTING_GUIDE.md)**
+Per la guida completa, apri: **[backend/TESTING_GUIDE.md](../backend/TESTING_GUIDE.md)**
 
 ## 🎯 Test Rapidi
 
 ```bash
+# Suite completa (equivalente CI locale)
+./scripts/check_all.sh
+
 # Health check
-curl http://localhost:8000/api/health
+curl http://localhost:8000/health
 
 # Lista vini
 curl http://localhost:8000/api/v1/inventory/wines | jq
@@ -114,4 +120,4 @@ backend/
 
 **Buon testing! 🚀**
 
-Per domande o problemi, consulta la [guida completa](./backend/TESTING_GUIDE.md).
+Per domande o problemi, consulta la [guida completa](../backend/TESTING_GUIDE.md).

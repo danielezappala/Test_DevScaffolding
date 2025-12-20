@@ -181,7 +181,7 @@ docker ps
 ## Best Practices
 
 1. **Non mettere il Mac in sleep con container attivi**
-   - Ferma i container prima: `docker-compose down`
+   - Ferma i container prima: `docker compose down`
    - Oppure ferma Colima: `colima stop`
 
 2. **Monitora l'uso delle risorse**
@@ -196,7 +196,7 @@ docker ps
 
 4. **Usa profili Docker Compose**
    - Avvia solo i servizi necessari
-   - Esempio: `docker-compose up` (senza Postgres se usi DB esterno)
+   - Esempio: `docker compose up` (senza Postgres se usi DB esterno)
 
 5. **Verifica i log in caso di problemi**
    ```bash

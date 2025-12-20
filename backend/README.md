@@ -65,6 +65,12 @@ FastAPI backend service for eno_inventory.
    - Version: http://localhost:8000/api/v1/version
    - Metrics: http://localhost:8000/metrics
 
+   When running behind Traefik with a subpath, set `ROOT_PATH=/inventory` and use:
+   - API Documentation: https://test.example.com/inventory/api/docs
+   - ReDoc: https://test.example.com/inventory/api/redoc
+   - Health Check: https://test.example.com/inventory/api/v1/health
+   - Version: https://test.example.com/inventory/api/v1/version
+
 ### Docker Development
 
 ```bash
@@ -190,6 +196,7 @@ Key variables:
 - `APP_VERSION` - Application version
 - `GIT_COMMIT` - Git commit hash
 - `BUILD_DATE` - Build timestamp
+- `ROOT_PATH` - Base path for reverse proxies (e.g. `/inventory` when using Traefik subpath routing)
 
 ## API Documentation
 

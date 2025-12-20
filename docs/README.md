@@ -47,7 +47,7 @@ eno_inventory is a production-ready monorepo application built with modern techn
 - **Technology**: Next.js 14+ with App Router, TypeScript, Tailwind CSS, shadcn/ui
 - **Features**: Server-Side Rendering (SSR), Incremental Static Regeneration (ISR)
 - **Port**: 3000 (internal)
-- **Routing**: Served at `https://test.example.com/`
+- **Routing**: Served at `https://test.example.com/inventory` when `BASE_PATH=/inventory`
 
 #### Backend (FastAPI)
 - **Technology**: Python 3.12, FastAPI, Pydantic v2, SQLAlchemy/SQLModel
@@ -58,7 +58,7 @@ eno_inventory is a production-ready monorepo application built with modern techn
   - Version endpoint at `/api/v1/version`
   - Redis-based session management with opaque tokens
 - **Port**: 8000 (internal)
-- **Routing**: Served at `https://test.example.com/api/`
+- **Routing**: Served at `https://test.example.com/inventory/api/` when `ROOT_PATH=/inventory`
 
 #### Database (PostgreSQL 17)
 - **Technology**: PostgreSQL 17 with JSONB support
@@ -123,10 +123,10 @@ eno_inventory/
 
 ### Request Flow
 
-1. **Client Request**: User makes HTTPS request to `https://test.example.com`
+1. **Client Request**: User makes HTTPS request to `https://test.example.com/inventory`
 2. **Traefik**: Terminates TLS, routes based on path:
-   - `/api/*` → Backend service
-   - `/*` → Frontend service
+   - `/inventory/api/*` → Backend service
+   - `/inventory/*` → Frontend service
 3. **Backend Processing** (for API requests):
    - FastAPI receives request
    - Validates request with Pydantic
@@ -232,9 +232,9 @@ make down
 ## API Documentation
 
 The backend automatically generates OpenAPI documentation:
-- **Swagger UI**: `https://test.example.com/api/docs`
-- **ReDoc**: `https://test.example.com/api/redoc`
-- **OpenAPI JSON**: `https://test.example.com/api/openapi.json`
+- **Swagger UI**: `https://test.example.com/inventory/api/docs`
+- **ReDoc**: `https://test.example.com/inventory/api/redoc`
+- **OpenAPI JSON**: `https://test.example.com/inventory/api/openapi.json`
 
 See [api/README.md](./api/README.md) for more details.
 

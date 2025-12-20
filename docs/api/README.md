@@ -6,8 +6,8 @@ The eno_inventory backend provides a RESTful API built with FastAPI. All API end
 
 ## Base URL
 
-- **Production**: `https://test.example.com/api/v1`
-- **Development**: `http://localhost:8000/api/v1`
+- **Production (Traefik + subpath)**: `https://test.example.com/inventory/api/v1`
+- **Development (direct backend)**: `http://localhost:8000/api/v1`
 
 ## Authentication
 
@@ -34,7 +34,7 @@ The API automatically generates interactive documentation:
 ### Swagger UI
 Interactive API documentation with request/response examples and testing interface.
 
-**URL**: `https://test.example.com/api/docs`
+**URL**: `https://test.example.com/inventory/api/docs`
 
 Features:
 - Browse all endpoints
@@ -45,7 +45,7 @@ Features:
 ### ReDoc
 Alternative documentation with a clean, three-panel design.
 
-**URL**: `https://test.example.com/api/redoc`
+**URL**: `https://test.example.com/inventory/api/redoc`
 
 Features:
 - Clean, readable layout
@@ -56,7 +56,7 @@ Features:
 ### OpenAPI Specification
 Raw OpenAPI 3.0 specification in JSON format.
 
-**URL**: `https://test.example.com/api/openapi.json`
+**URL**: `https://test.example.com/inventory/api/openapi.json`
 
 Use this for:
 - Generating client SDKs
@@ -242,9 +242,9 @@ Request validation is performed using Pydantic models. Validation errors return 
 
 ## CORS
 
-Cross-Origin Resource Sharing (CORS) is configured to allow requests from the frontend domain.
+Cross-Origin Resource Sharing (CORS) is configured via `CORS_ORIGINS`.
 
-**Allowed Origins**:
+**Typical Allowed Origins**:
 - `https://test.example.com`
 - `http://localhost:3000` (development)
 
@@ -276,12 +276,12 @@ Use the OpenAPI specification to generate client SDKs:
 
 **TypeScript/JavaScript**:
 ```bash
-npx openapi-typescript-codegen --input https://test.example.com/api/openapi.json --output ./src/api
+npx openapi-typescript-codegen --input https://test.example.com/inventory/api/openapi.json --output ./src/api
 ```
 
 **Python**:
 ```bash
-openapi-generator-cli generate -i https://test.example.com/api/openapi.json -g python -o ./client
+openapi-generator-cli generate -i https://test.example.com/inventory/api/openapi.json -g python -o ./client
 ```
 
 ### Example Usage
@@ -290,7 +290,7 @@ openapi-generator-cli generate -i https://test.example.com/api/openapi.json -g p
 ```typescript
 import { ApiClient } from '@/lib/api-client';
 
-const client = new ApiClient('https://test.example.com/api/v1');
+const client = new ApiClient('https://test.example.com/inventory/api/v1');
 
 // Get version
 const version = await client.get('/version');
@@ -301,7 +301,7 @@ console.log(version.data);
 ```python
 import requests
 
-response = requests.get('https://test.example.com/api/v1/version')
+response = requests.get('https://test.example.com/inventory/api/v1/version')
 data = response.json()
 print(data)
 ```
@@ -310,7 +310,7 @@ print(data)
 
 ### Using Swagger UI
 
-1. Navigate to `https://test.example.com/api/docs`
+1. Navigate to `https://test.example.com/inventory/api/docs`
 2. Click on an endpoint to expand
 3. Click "Try it out"
 4. Fill in parameters
@@ -321,24 +321,24 @@ print(data)
 
 ```bash
 # Get version
-curl https://test.example.com/api/v1/version
+curl https://test.example.com/inventory/api/v1/version
 
 # With authentication
 curl -H "Authorization: Bearer <token>" \
-     https://test.example.com/api/v1/protected-endpoint
+     https://test.example.com/inventory/api/v1/protected-endpoint
 
 # POST request
 curl -X POST \
      -H "Content-Type: application/json" \
      -H "Authorization: Bearer <token>" \
      -d '{"key": "value"}' \
-     https://test.example.com/api/v1/endpoint
+     https://test.example.com/inventory/api/v1/endpoint
 ```
 
 ### Using Postman
 
-1. Import OpenAPI spec: `https://test.example.com/api/openapi.json`
-2. Set base URL: `https://test.example.com/api/v1`
+1. Import OpenAPI spec: `https://test.example.com/inventory/api/openapi.json`
+2. Set base URL: `https://test.example.com/inventory/api/v1`
 3. Configure authentication in collection settings
 4. Test endpoints
 
@@ -362,10 +362,10 @@ Monitor API health:
 
 ```bash
 # Basic health check
-curl https://test.example.com/api/v1/health
+curl https://test.example.com/inventory/api/v1/health
 
 # Detailed health check (if implemented)
-curl https://test.example.com/api/v1/health/detailed
+curl https://test.example.com/inventory/api/v1/health/detailed
 ```
 
 ## Best Practices
@@ -430,4 +430,4 @@ Current version: **v1**
 - [Main Documentation](../README.md)
 - [Contributing Guidelines](../CONTRIBUTING.md)
 - [Backend README](../../backend/README.md)
-- [OpenAPI Specification](https://test.example.com/api/openapi.json)
+- [OpenAPI Specification](https://test.example.com/inventory/api/openapi.json)

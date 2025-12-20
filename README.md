@@ -63,7 +63,7 @@ To view detailed workflow results:
    - Click the ✅ or ❌ icon next to any commit
    - View all workflow statuses for that commit
 
-For more information about the CI/CD pipelines, see [docs/CI_CD.md](docs/CI_CD.md).
+For more information about the CI/CD pipelines, see [.github/README.md](.github/README.md).
 
 ## Quick Start
 
@@ -104,8 +104,9 @@ For more information about the CI/CD pipelines, see [docs/CI_CD.md](docs/CI_CD.m
 - Frontend: `https://test.example.com/inventory`
    - Backend API: `https://test.example.com/inventory/api/v1`
    - API Docs: `https://test.example.com/inventory/api/docs`
-   - Local Frontend: `http://localhost/inventory`
-   - Local Backend API: `http://localhost/inventory/api/v1`
+   - Local (Traefik): `http://localhost/inventory`
+   - Local Backend API (Traefik): `http://localhost/inventory/api/v1`
+   - Local Frontend (Next dev server): `http://localhost:3000`
 - Traefik Dashboard: `http://localhost:8080`
    - Prometheus: `http://localhost:9090`
 
@@ -285,18 +286,18 @@ This application is configured for **subpath deployment** at `/inventory`. This 
 - For local testing, use `http://localhost/inventory`
 
 **Key Configuration Details:**
-- **Next.js basePath**: Set to `/inventory` in `frontend/next.config.js`
-- **FastAPI root_path**: Set to `/inventory` in `backend/app/main.py`
+- **Next.js basePath**: Derived from `NEXT_PUBLIC_BASE_PATH` in `frontend/next.config.js` (defaults to empty in dev)
+- **FastAPI root_path**: Derived from `ROOT_PATH` in `backend/app/main.py` (set to `/inventory` in Docker Compose)
 - **Traefik routing**: Configured with `PathPrefix(/inventory)` rules
-- **Environment variable**: `NEXT_PUBLIC_BASE_PATH=/inventory`
+- **Environment variables**: `NEXT_PUBLIC_BASE_PATH=/inventory`, `ROOT_PATH=/inventory`
 
 ## API Documentation
 
 The backend automatically generates interactive API documentation:
 
-- **Swagger UI**: `https://test.example.com/api/docs`
-- **ReDoc**: `https://test.example.com/api/redoc`
-- **OpenAPI JSON**: `https://test.example.com/api/openapi.json`
+- **Swagger UI**: `https://test.example.com/inventory/api/docs`
+- **ReDoc**: `https://test.example.com/inventory/api/redoc`
+- **OpenAPI JSON**: `https://test.example.com/inventory/api/openapi.json`
 
 See [docs/api/README.md](docs/api/README.md) for detailed API documentation.
 
@@ -547,7 +548,7 @@ curl http://localhost/inventory/api/v1/health
 ```
 
 **Expected configuration:**
-- `NEXT_PUBLIC_API_URL` should be: `https://test.example.com/inventory/api`
+- `NEXT_PUBLIC_API_URL` should be: `https://test.example.com/inventory/api/v1`
 - Backend Traefik rule should include: `PathPrefix(/inventory/api)`
 
 **Problem: OpenAPI docs not accessible**
@@ -659,7 +660,7 @@ cd frontend && npm test
 - 📖 [Pull Request Status Checks Guide](.github/PR_STATUS_CHECKS.md)
 - 📋 [Status Checks Quick Reference](.github/STATUS_CHECKS_REFERENCE.md)
 - 🛡️ [Branch Protection Configuration](.github/BRANCH_PROTECTION.md)
-- 📚 [CI/CD Documentation](docs/CI_CD.md)
+- 📚 [CI/CD Documentation](.github/README.md)
 
 ## Contributing
 

@@ -27,7 +27,11 @@ npm install
 2. Set environment variables:
 ```bash
 # Create .env.local file
-echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
+cat <<'EOF' > .env.local
+NEXT_PUBLIC_API_URL=http://localhost:8000
+# Optional for subpath deployments (e.g. Traefik): /inventory
+NEXT_PUBLIC_BASE_PATH=
+EOF
 ```
 
 3. Run development server:
@@ -53,7 +57,10 @@ Build and run with Docker:
 
 ```bash
 docker build -t eno_inventory-frontend .
-docker run -p 3000:3000 -e NEXT_PUBLIC_API_URL=http://backend:8000 eno_inventory-frontend
+docker run -p 3000:3000 \
+  -e NEXT_PUBLIC_API_URL=http://backend:8000 \
+  -e NEXT_PUBLIC_BASE_PATH=/inventory \
+  eno_inventory-frontend
 ```
 
 ## Project Structure
@@ -75,6 +82,7 @@ src/
 ## Environment Variables
 
 - `NEXT_PUBLIC_API_URL` - Backend API URL (default: http://backend:8000)
+- `NEXT_PUBLIC_BASE_PATH` - Base path for subpath deployments (empty by default)
 
 ## Adding shadcn/ui Components
 

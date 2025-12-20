@@ -25,9 +25,9 @@ Non serve fermare Colima quando cambi progetto. Lascialo girare:
 ```bash
 # ✅ CORRETTO - Colima resta attivo
 cd ~/progetto-a
-docker-compose up -d
+docker compose up -d
 cd ~/progetto-b
-docker-compose up -d
+docker compose up -d
 ```
 
 #### 2. Ferma solo i container, non Colima
@@ -36,7 +36,7 @@ Quando finisci di lavorare su un progetto:
 
 ```bash
 # ✅ CORRETTO - Ferma solo i container del progetto
-docker-compose down
+docker compose down
 
 # ❌ EVITA - Non serve fermare Colima
 colima stop
@@ -70,13 +70,13 @@ Se due progetti usano la stessa porta, avvia solo uno alla volta:
 ```bash
 # Progetto A (usa porta 8000)
 cd ~/progetto-a
-docker-compose up -d
+docker compose up -d
 
 # Per lavorare su Progetto B (usa anche porta 8000)
 cd ~/progetto-a
-docker-compose down  # Ferma Progetto A
+docker compose down  # Ferma Progetto A
 cd ~/progetto-b
-docker-compose up -d  # Avvia Progetto B
+docker compose up -d  # Avvia Progetto B
 ```
 
 Oppure configura porte diverse:
@@ -208,7 +208,7 @@ docker stop container-id
 docker stop $(docker ps -q)
 
 # Riavvia solo quelli del progetto corrente
-docker-compose up -d
+docker compose up -d
 ```
 
 #### Spazio disco esaurito
@@ -240,10 +240,18 @@ fi
 
 ### Checklist Cambio Progetto
 
-- [ ] Ferma container progetto precedente: `docker-compose down`
+- [ ] Ferma container progetto precedente: `docker compose down`
 - [ ] Vai nella directory nuovo progetto: `cd ~/nuovo-progetto`
 - [ ] Verifica Docker: `docker ps`
-- [ ] Avvia nuovo progetto: `./scripts/start_services.sh` o `docker-compose up -d`
+- [ ] Avvia nuovo progetto: `./scripts/start_services.sh` o `docker compose up -d`
+
+### Reset Pulito dello Stack (opzionale)
+
+Se vuoi ripartire da zero con i volumi del progetto:
+
+```bash
+./scripts/reset_stack.sh
+```
 
 ### Risorse Consigliate per Scenario
 
