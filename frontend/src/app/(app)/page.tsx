@@ -74,14 +74,14 @@ export default function DashboardPage() {
         value: loading ? "…" : wines.length.toString(),
         delta: `${critical.length} stock critici`,
         color: "teal",
-        href: "/inventory",
+        href: "/stock",
       },
       {
         title: "Bottiglie a stock",
         value: loading ? "…" : totalBottles.toLocaleString("it-IT"),
         delta: `${movementBreakdown.in} carichi recenti`,
         color: "teal",
-        href: "/inventory",
+        href: "/stock",
       },
       {
         title: "Movimenti recenti",
@@ -202,7 +202,7 @@ export default function DashboardPage() {
                     className="flex items-center justify-between rounded-lg border border-earth-brick/30 bg-earth-brick/20 px-3 py-2 text-sm"
                   >
                     <Link
-                      href={`/inventory/${row.id}`}
+                      href={`/stock/${row.id}`}
                       className="flex items-center gap-2 font-medium text-foreground underline-offset-4 hover:underline"
                     >
                       <span
@@ -238,7 +238,7 @@ export default function DashboardPage() {
                       <span className="text-xs text-foreground/70">Qty: {wine.quantity} btg</span>
                     </div>
                     <Link
-                      href={`/inventory/${wine.id}`}
+                      href={`/stock/${wine.id}`}
                       className="rounded-full border border-earth-teal/70 bg-earth-teal/30 px-4 py-1.5 text-xs font-semibold text-foreground transition hover:border-earth-teal hover:bg-earth-teal/40"
                     >
                       Scheda

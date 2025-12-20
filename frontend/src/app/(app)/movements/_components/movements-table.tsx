@@ -158,7 +158,7 @@ export function MovementsTable({ movements, wines }: MovementsTableProps) {
               <div className="flex items-center gap-2">
                 {wine && (
                   <Button
-                    href={`/inventory/${wine.id}`}
+                    href={`/stock/${wine.id}`}
                     variant="ghost"
                     size="sm"
                   >

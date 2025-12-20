@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 import { serverInventoryApi } from "@/lib/server-api";
 import type { MovementFilters } from "@/types";
 import { MovementFilterControls } from "./_components/filter-controls";
-import { InventoryPaginationControls } from "../inventory/_components/pagination-controls";
+import { InventoryPaginationControls } from "../stock/_components/pagination-controls";
 import { MovementsTable } from "./_components/movements-table";
 import { Button } from "@/components/button";
 

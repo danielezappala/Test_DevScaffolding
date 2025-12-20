@@ -64,16 +64,18 @@ services:
       - "traefik.http.routers.backend-local.middlewares=strip-base-path"
 
   frontend:
-    image: ghcr.io/danielezappala/eno-inventory-frontend:latest
+    #image: ghcr.io/danielezappala/eno-inventory-frontend:local
+    image: eno-inventory-frontend:local
     build:
       context: ../frontend
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_BASE_PATH: /inventory
-        NEXT_PUBLIC_API_URL: /inventory/api/v1
+        NEXT_PUBLIC_API_URL: http://backend:8000
     environment:
       NEXT_PUBLIC_BASE_PATH: /inventory
-      NEXT_PUBLIC_API_URL: /inventory/api/v1
+      NEXT_PUBLIC_API_URL: http://backend:8000
+      INTERNAL_API_URL: http://backend:8000
     container_name: eno_inventory-frontend
     restart: unless-stopped
     ports:
@@ -88,13 +90,18 @@ services:
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
       - "traefik.http.middlewares.inventory-redirect.redirectregex.regex=^/inventory/?$"
-      - "traefik.http.middlewares.inventory-redirect.redirectregex.replacement=/inventory/dashboard"
+      - "traefik.http.middlewares.inventory-redirect.redirectregex.replacement=/inventory/"
       - "traefik.http.routers.frontend.middlewares=inventory-redirect"
       - "traefik.http.routers.frontend-assets.rule=Host(`${DOMAIN}`) && PathPrefix(`/inventory/_next`)"
       - "traefik.http.routers.frontend-assets.entrypoints=websecure"
       - "traefik.http.routers.frontend-assets.tls.certresolver=letsencrypt"
       - "traefik.http.routers.frontend-assets.service=frontend"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.frontend-local.rule=Host(`localhost`) && PathPrefix(`/inventory`)"
+      - "traefik.http.routers.frontend-local.entrypoints=web"
+      - "traefik.http.routers.frontend-assets-local.rule=Host(`localhost`) && PathPrefix(`/inventory/_next`)"
+      - "traefik.http.routers.frontend-assets-local.entrypoints=web"
+      - "traefik.http.routers.frontend-assets-local.service=frontend"
   postgres:
     image: postgres:17-alpine
     container_name: eno_inventory-postgres

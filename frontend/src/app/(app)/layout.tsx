@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const navItems = [
     { label: "Dashboard", href: "/", icon: LayoutDashboard, color: "taupe-dark" },
     { label: "Quick Scan", href: "/quick-scan", icon: Scan, color: "teal" },
-    { label: "Inventario", href: "/inventory", icon: Package, color: "teal" },
+    { label: "Inventario", href: "/stock", icon: Package, color: "teal" },
     { label: "Movimenti", href: "/movements", icon: TrendingUp, color: "sage" },
     { label: "Fornitori", href: "/suppliers", icon: Users, color: "taupe" },
     { label: "Stock critici", href: "/critical", icon: AlertTriangle, color: "brick" },

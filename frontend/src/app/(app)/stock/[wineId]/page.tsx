@@ -40,7 +40,7 @@ export default async function WineDetailPage({ params }: PageProps) {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <Link
-            href={`/inventory/${wine.id}/edit`}
+            href={`/stock/${wine.id}/edit`}
             className="inline-flex items-center gap-2 rounded-full border border-primary/70 bg-primary/15 px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:border-primary hover:bg-primary/25"
           >
             Modifica
